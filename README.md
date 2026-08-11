@@ -1,5 +1,5 @@
 # 汾源酒业经营体
-# Leasing_entity
+# Fenyuan_liquor_industry
 
 ## 快速开始
 
@@ -12,9 +12,11 @@ cd backend
 mvn spring-boot:run
 ```
 
-- 端口：`http://localhost:4001`
-- 开发默认使用内存 H2，接口文档：`http://localhost:4001/doc.html`
+- 端口：`http://localhost:6001`
+- 开发默认使用内存 H2，接口文档：`http://localhost:6001/doc.html`
 - 账号：`admin` / `admin123`
+- 生产库名：`Fenyuan_liquor_industry`（与 `gongcheng_leasing` 模板库相互独立，勿互相覆盖）
+- 初始化脚本：`backend/sql/Fenyuan_liquor_industry.sql`
 - 切换 MySQL：`--spring.profiles.active=prod`
 
 ### 启动前端
@@ -25,15 +27,26 @@ npm install
 npm run dev
 ```
 
-- 访问：`http://localhost:4001`
-- `/api` 已代理到后端 `4001`
+- 访问：`http://localhost:5173/Fenyuan_liquor_industry/`（Vite `base=/Fenyuan_liquor_industry/`）
+- `/Fenyuan_liquor_industry/api` 已代理到后端 `6001`
+
+### 线上部署（nginx apps）
+
+```powershell
+.\deploy\pack.ps1
+```
+
+- 登录页：https://www.zszy.cc/Fenyuan_liquor_industry/login
+- API：`/Fenyuan_liquor_industry/api/*` → `127.0.0.1:6001/api/*`
+- 发布目录：`D:\E\nginx-1.26.3\nginx-1.26.3\apps\Fenyuan_liquor_industry`
 
 ### 目录结构
 
 ```
-Leasing_entity/
+Fenyuan_liquor_industry/
 ├── backend/          # Java Spring Boot 后端
 ├── frontend/         # React 管理端
+├── deploy/           # 打包发布到 nginx apps
 ├── tools/            # 本地 Maven（已 gitignore）
 └── README.md
 ```

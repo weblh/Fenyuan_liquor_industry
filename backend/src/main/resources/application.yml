@@ -1,0 +1,49 @@
+server:
+  port: 6001
+
+spring:
+  application:
+    name: Fenyuan_liquor_industry
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:Fenyuan_liquor_industry;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  db-type: h2
+
+jwt:
+  secret: FenyuanLiquor2026SecretKeyForJwtAuth
+  expiration: 7200000
+
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+
+logging:
+  level:
+    com.fenyuan.liquor: info

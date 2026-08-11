@@ -1,0 +1,20 @@
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tag {
+  cursor: pointer;
+  margin: 0 !important;
+  user-select: none;
+}
+
+.active {
+  color: #8b1a1a !important;
+  background: #fdf2f2 !important;
+  border-color: #e8b4b4 !important;
+}

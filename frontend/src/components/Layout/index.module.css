@@ -1,0 +1,27 @@
+.root {
+  min-height: 100vh;
+}
+
+.main {
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+.content {
+  margin: 12px 16px;
+  min-height: calc(100vh - 200px);
+}
+
+.panel {
+  background: #fff;
+  padding: 16px;
+  border-radius: 6px;
+  min-height: 360px;
+}
+
+.panelFlush {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  min-height: 360px;
+}
