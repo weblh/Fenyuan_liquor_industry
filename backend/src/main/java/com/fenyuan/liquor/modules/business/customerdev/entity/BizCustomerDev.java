@@ -13,6 +13,9 @@ public class BizCustomerDev {
     @TableId(type = IdType.AUTO)
     private Long id;
     private String name;
+    private String openMonth;
+    /** 1=开发成功（页面仅展示成功客户） */
+    private Integer status;
     private BigDecimal amount;
     @TableField(fill = FieldFill.INSERT)
     private Long createBy;

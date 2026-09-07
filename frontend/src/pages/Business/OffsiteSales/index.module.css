@@ -1,0 +1,32 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mapPanel {
+  margin-bottom: 16px;
+  padding: 16px 16px 8px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.mapHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.mapHead h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #1f1a17;
+}
+
+.mapHead span {
+  font-size: 12px;
+  color: #8c8c8c;
+}

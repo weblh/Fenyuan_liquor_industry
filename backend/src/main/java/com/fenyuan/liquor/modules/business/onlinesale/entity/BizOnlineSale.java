@@ -12,6 +12,7 @@ public class BizOnlineSale {
 
     @TableId(type = IdType.AUTO)
     private Long id;
+    private String customerName;
     private BigDecimal saleAmount;
     private BigDecimal shipAmount;
     private BigDecimal paymentAmount;

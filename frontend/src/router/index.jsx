@@ -15,7 +15,15 @@ import SalesRankPage from '@/pages/Business/SalesRank'
 import InventoryPage from '@/pages/Business/Inventory'
 import ProductStructurePage from '@/pages/Business/ProductStructure'
 import CustomerDevPage from '@/pages/Business/CustomerDev'
+import CustomerMaintainPage from '@/pages/Business/CustomerMaintain'
+import PriceComparePage from '@/pages/Business/PriceCompare'
+import OffsiteSalesPage from '@/pages/Business/OffsiteSales'
+import CmCloudSyncPage from '@/pages/Business/CmCloudSync'
 import ReceivablePage from '@/pages/Finance/Receivable'
+import KingdeeVoucherPage from '@/pages/Finance/KingdeeVoucher'
+import KingdeeCredentialPage from '@/pages/Kingdee/Credential'
+import KingdeeAccountSetPage from '@/pages/Kingdee/AccountSet'
+import BankVoucherPage from '@/pages/Kingdee/BankVoucher'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
 
@@ -43,12 +51,20 @@ const router = createBrowserRouter(
         { path: 'settings/config', element: <ConfigPage /> },
         { path: 'log/oper', element: <OperLogPage /> },
         { path: 'log/login', element: <LoginLogPage /> },
+        { path: 'business/customer-maintain', element: <CustomerMaintainPage /> },
+        { path: 'business/price-compare', element: <PriceComparePage /> },
+        { path: 'business/offsite-sales', element: <OffsiteSalesPage /> },
         { path: 'business/online-sale', element: <OnlineSalePage /> },
         { path: 'business/sales-rank', element: <SalesRankPage /> },
         { path: 'business/inventory', element: <InventoryPage /> },
         { path: 'business/product-structure', element: <ProductStructurePage /> },
         { path: 'business/customer-dev', element: <CustomerDevPage /> },
+        { path: 'business/cmcloud-sync', element: <CmCloudSyncPage /> },
         { path: 'finance/receivable', element: <ReceivablePage /> },
+        { path: 'finance/kingdee-voucher', element: <KingdeeVoucherPage /> },
+        { path: 'kingdee/credential', element: <KingdeeCredentialPage /> },
+        { path: 'kingdee/account-set', element: <KingdeeAccountSetPage /> },
+        { path: 'kingdee/bank-voucher', element: <BankVoucherPage /> },
       ],
     },
     {

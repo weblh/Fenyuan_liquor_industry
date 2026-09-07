@@ -3,10 +3,14 @@ package com.fenyuan.liquor.modules.auth.service;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fenyuan.liquor.common.config.HubDashboardProperties;
 import com.fenyuan.liquor.common.exception.BusinessException;
+import com.fenyuan.liquor.common.hub.FengchiIdentityClient;
 import com.fenyuan.liquor.common.utils.JwtUtils;
 import com.fenyuan.liquor.common.utils.SecurityUtils;
 import com.fenyuan.liquor.modules.auth.dto.CaptchaResponse;
+import com.fenyuan.liquor.modules.auth.dto.DashboardExchangeRequest;
 import com.fenyuan.liquor.modules.auth.dto.LoginRequest;
 import com.fenyuan.liquor.modules.auth.dto.LoginResponse;
 import com.fenyuan.liquor.modules.auth.dto.UserInfoVO;
@@ -15,6 +19,7 @@ import com.fenyuan.liquor.modules.monitor.log.mapper.SysLoginLogMapper;
 import com.fenyuan.liquor.modules.system.user.entity.SysUser;
 import com.fenyuan.liquor.modules.system.user.mapper.SysUserMapper;
 import com.fenyuan.liquor.security.LoginUser;
+import com.fenyuan.liquor.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -35,6 +40,9 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final SysUserMapper sysUserMapper;
     private final SysLoginLogMapper sysLoginLogMapper;
+    private final HubDashboardProperties hubDashboardProperties;
+    private final FengchiIdentityClient fengchiIdentityClient;
+    private final UserDetailsServiceImpl userDetailsService;
 
     private final Map<String, String> captchaStore = new ConcurrentHashMap<>();
 
@@ -110,6 +118,36 @@ public class AuthService {
             vo.setDeptId(user.getDeptId());
         }
         return vo;
+    }
+
+    /**
+     * 广州总大屏：校验丰驰登录身份后，为本系统展示账号签发 JWT。
+     */
+    public LoginResponse dashboardExchange(DashboardExchangeRequest request, HttpServletRequest httpRequest) {
+        fengchiIdentityClient.assertHubAllowed(request.getFengchiToken());
+
+        String displayUsername = hubDashboardProperties.getDisplayUsername();
+        SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getUsername, displayUsername)
+                .last("LIMIT 1"));
+        if (user == null) {
+            throw new BusinessException(500, "展示账号不存在: " + displayUsername);
+        }
+        if (user.getStatus() != null && user.getStatus() == 0) {
+            throw new BusinessException(403, "展示账号已停用");
+        }
+
+        LoginUser loginUser = (LoginUser) userDetailsService.loadUserByUsername(user.getUsername());
+        String token = jwtUtils.generateToken(loginUser.getUserId(), loginUser.getUsername());
+
+        saveLoginLog(loginUser.getUsername(), loginUser.getUserId(), 1,
+                "总大屏换发登录" + (request.getClient() == null ? "" : ("/" + request.getClient())),
+                httpRequest);
+
+        LoginResponse response = new LoginResponse();
+        response.setToken(token);
+        response.setUserInfo(toUserInfo(loginUser));
+        return response;
     }
 
     private UserInfoVO toUserInfo(LoginUser loginUser) {

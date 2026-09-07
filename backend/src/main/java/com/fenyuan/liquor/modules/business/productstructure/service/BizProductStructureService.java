@@ -24,8 +24,14 @@ public class BizProductStructureService {
     public PageResult<BizProductStructure> page(long current, long size, String category) {
         Page<BizProductStructure> page = mapper.selectPage(new Page<>(current, size),
                 new LambdaQueryWrapper<BizProductStructure>()
-                        .like(StrUtil.isNotBlank(category), BizProductStructure::getCategory, category)
-                        .orderByDesc(BizProductStructure::getId));
+                        .and(StrUtil.isNotBlank(category), w -> w
+                                .like(BizProductStructure::getCategory, category)
+                                .or()
+                                .like(BizProductStructure::getSeries, category)
+                                .or()
+                                .like(BizProductStructure::getProductName, category))
+                        .orderByAsc(BizProductStructure::getSeries)
+                        .orderByDesc(BizProductStructure::getQuantity));
         return PageResult.of(page);
     }
 
@@ -38,6 +44,9 @@ public class BizProductStructureService {
     }
 
     public void create(BizProductStructure entity) {
+        if (!StringUtils.hasText(entity.getCategory()) && StringUtils.hasText(entity.getSeries())) {
+            entity.setCategory(entity.getSeries());
+        }
         mapper.insert(entity);
     }
 

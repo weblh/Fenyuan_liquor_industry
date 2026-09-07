@@ -25,6 +25,9 @@ public class BizOnlineSaleService {
         Page<BizOnlineSale> page = mapper.selectPage(new Page<>(current, size),
                 new LambdaQueryWrapper<BizOnlineSale>()
                         .like(StrUtil.isNotBlank(periodName), BizOnlineSale::getPeriodName, periodName)
+                        .and(w -> w.like(BizOnlineSale::getCustomerName, "美福")
+                                .or().like(BizOnlineSale::getCustomerName, "美团")
+                                .or().like(BizOnlineSale::getCustomerName, "即时零售"))
                         .orderByDesc(BizOnlineSale::getId));
         return PageResult.of(page);
     }

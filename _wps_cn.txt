@@ -1,0 +1,11 @@
+﻿默认段落字体
+普通表格
+python : Traceback (most recent call last):
+所在位置 C:\Users\Administrator\AppData\Local\Temp\ps-script-2294ea25-a3de-4232-bf3f-924154513397.ps1:123 字符: 1
++ python -c "
++ ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "<string>", line 22, in <module>
+UnicodeEncodeError: 'gbk' codec can't encode character '\u4300' in position 0: illegal multibyte sequence

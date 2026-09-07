@@ -13,6 +13,8 @@ export default function BizCrudPage({
   api,
   fields,
   rowKey = 'id',
+  toolbarExtra,
+  onReady,
 }) {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState([])
@@ -45,6 +47,12 @@ export default function BizCrudPage({
   useEffect(() => {
     fetchList()
   }, [])
+
+  useEffect(() => {
+    if (typeof onReady === 'function') {
+      onReady({ reload: () => fetchList() })
+    }
+  }, [onReady])
 
   const openModal = (record) => {
     setEditing(record || null)
@@ -171,6 +179,7 @@ export default function BizCrudPage({
                 新增
               </Button>
             </Permission>
+            {toolbarExtra}
           </Space>
         </Form.Item>
       </Form>

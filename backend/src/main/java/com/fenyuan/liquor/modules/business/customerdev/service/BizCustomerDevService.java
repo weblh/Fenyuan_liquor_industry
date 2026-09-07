@@ -24,7 +24,9 @@ public class BizCustomerDevService {
     public PageResult<BizCustomerDev> page(long current, long size, String name) {
         Page<BizCustomerDev> page = mapper.selectPage(new Page<>(current, size),
                 new LambdaQueryWrapper<BizCustomerDev>()
+                        .eq(BizCustomerDev::getStatus, 1)
                         .like(StrUtil.isNotBlank(name), BizCustomerDev::getName, name)
+                        .orderByDesc(BizCustomerDev::getOpenMonth)
                         .orderByDesc(BizCustomerDev::getId));
         return PageResult.of(page);
     }
@@ -38,6 +40,9 @@ public class BizCustomerDevService {
     }
 
     public void create(BizCustomerDev entity) {
+        if (entity.getStatus() == null) {
+            entity.setStatus(1);
+        }
         mapper.insert(entity);
     }
 

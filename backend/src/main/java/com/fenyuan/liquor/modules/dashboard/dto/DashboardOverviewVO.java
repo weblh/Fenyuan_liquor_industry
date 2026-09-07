@@ -23,6 +23,10 @@ public class DashboardOverviewVO {
     private List<NameAmountItem> customerDev = new ArrayList<>();
     /** 应收账款 */
     private List<NameAmountItem> receivable = new ArrayList<>();
+    /** 60天未复购客户（推送主看板） */
+    private List<RetentionAlertItem> retentionAlerts = new ArrayList<>();
+    /** 异地销售明细（地图） */
+    private List<OffsiteSaleItem> offsiteSales = new ArrayList<>();
 
     @Data
     public static class Summary {
@@ -33,15 +37,20 @@ public class DashboardOverviewVO {
         private BigDecimal totalInventoryQty = BigDecimal.ZERO;
         private BigDecimal totalReceivableAmount = BigDecimal.ZERO;
         private BigDecimal totalCustomerDevAmount = BigDecimal.ZERO;
+        private BigDecimal totalOffsiteQty = BigDecimal.ZERO;
         private long dealerCount;
         private long productCategoryCount;
         private long inventorySkuCount;
         private long customerDevCount;
         private long receivableCount;
+        private long retentionAlertCount;
+        private long offsiteProvinceCount;
     }
 
     @Data
     public static class OnlineSaleTrendItem {
+        /** 美福 / 美团名酒行 */
+        private String customerName;
         private String periodName;
         private BigDecimal saleAmount;
         private BigDecimal shipAmount;
@@ -58,6 +67,8 @@ public class DashboardOverviewVO {
 
     @Data
     public static class ProductStructureItem {
+        private String series;
+        private String productName;
         private String category;
         private BigDecimal quantity;
         private BigDecimal ratio;
@@ -78,5 +89,25 @@ public class DashboardOverviewVO {
         private String name;
         private BigDecimal amount;
         private String remark;
+        private String openMonth;
+    }
+
+    @Data
+    public static class RetentionAlertItem {
+        private String customerName;
+        private String contactPhone;
+        private Integer daysSincePurchase;
+        private String lastPurchaseDate;
+        private String remark;
+    }
+
+    @Data
+    public static class OffsiteSaleItem {
+        private String productName;
+        private BigDecimal quantity;
+        private String province;
+        private String city;
+        private String address;
+        private String sourceType;
     }
 }

@@ -39,6 +39,25 @@ jwt:
   secret: FenyuanLiquor2026SecretKeyForJwtAuth
   expiration: 7200000
 
+# 广州总大屏：用丰驰登录态换发本系统展示账号 JWT
+hub:
+  dashboard:
+    enabled: true
+    fengchi-validate-url: http://127.0.0.1:8081/api/auth/current-user
+    display-username: admin
+    allowed-emails:
+      - hub-dashboard@zszy.cc
+    allowed-phones:
+      - "19803477000"
+
+# 管家婆云财贸本地客户端缓存（CMCloud/Data/BaseInfo）
+cmcloud:
+  sync-enabled: true
+  base-info-path: D:/F/CMCloud/Data/BaseInfo
+  api-base-url: http://127.0.0.1:45100
+  api-mode: local
+  bill-sync-days: 365
+
 knife4j:
   enable: true
   setting:
@@ -47,3 +66,16 @@ knife4j:
 logging:
   level:
     com.fenyuan.liquor: info
+
+kingdee:
+  voucher:
+    bank-detail:
+      form-id: GL_VOUCHER
+      voucher-group: 银
+      voucher-group-number: PZZ2
+      bank-account: 1002.15
+      bank-dimension-number: "007"
+      bank-dimension-key: FDETAILID__FFLEX14
+      customer-dimension-key: FDETAILID__FFLEX6
+      qr-fee-rate: "0.003"
+      qr-customer-name: "扫码收款"

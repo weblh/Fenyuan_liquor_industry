@@ -1,0 +1,67 @@
+﻿=== FY7 分类 ===
+10: RECEIPT/QR | amt=775.57 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003545452125REB2B       2026070270 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+11: RECEIPT/QR | amt=159.52 | cp=通联支付网络服务股份有限公司 | sum=BEPS905290000008  2026070342306373 | rem=TL20260702SS5Z7F0.48
+12: RECEIPT/QR | amt=1562.2 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003545579811REB2B       2026070370 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+14: RECEIPT/QR | amt=1129.91 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003545804461REB2B       2026070570 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+17: RECEIPT/QR | amt=1262.48 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003546173180REB2B       2026070870 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+20: RECEIPT/QR | amt=372.65 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003546457214REB2B       2026071070 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+28: RECEIPT/QR | amt=3443.69 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003546586360REB2B       2026071170 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+30: RECEIPT/QR | amt=879.07 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003546692812REB2B       2026071270 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+32: RECEIPT/QR | amt=616.15 | cp=通联支付网络服务股份有限公司 | sum=BEPS905290000008  2026071334916331 | rem=TL20260712SS5Z7F1.85
+33: RECEIPT/QR | amt=1892.56 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003546812509REB2B       2026071370 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+36: RECEIPT/QR | amt=1611.4 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003546963211REB2B       2026071470 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+42: RECEIPT/QR | amt=396.91 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003547106415REB2B       2026071570 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+43: RECEIPT/QR | amt=776.91 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003547250272REB2B       2026071670 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+45: RECEIPT/QR | amt=2485.2 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003547392929REB2B       2026071770 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+50: RECEIPT/QR | amt=6173.07 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003547522586REB2B       2026071870 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+51: RECEIPT/QR | amt=1876.66 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003547636465REB2B       2026071970 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+52: RECEIPT/QR | amt=1493.03 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003547763586REB2B       2026072070 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+55: SOCIAL | amt=-2280.0 | cp=广州住房公积金管理中心 | sum=OBSS004461754949GIRO262c3daf30da | rem=DWTS 公积金
+59: RECEIPT/QR | amt=1483.92 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003548044876REB2B       2026072270 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+62: RECEIPT/QR | amt=159.52 | cp=通联支付网络服务股份有限公司 | sum=BEPS905290000008  2026072340359436 | rem=TL20260722SS5Z7F0.48
+63: RECEIPT/QR | amt=750.29 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003548327948REB2B       2026072470 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+64: RECEIPT/QR | amt=1241.5 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003548455040REB2B       2026072570 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+65: RECEIPT/QR | amt=752.09 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003548563457REB2B       2026072670 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+69: OTHER | amt=-23521.06 | cp= | sum=OBSS004480329623GIRO000000000000 | rem=
+70: RECEIPT/QR | amt=363.42 | cp=北京钱袋宝支付技术有限公司 | sum=PGW 00003548845923REB2B       2026072870 | rem=30444521(门店ID)美团外卖 30444521(门店ID)美团外卖
+STATS {'RECEIPT': 11, 'RECEIPT/QR': 23, 'GOODS': 13, 'TAX': 3, 'FREIGHT': 3, 'FEE': 7, 'SOCIAL': 1, 'OTHER': 1}
+\n=== FY8 分类 ===
+9: GOODS | amt=-405.0 | cp=中国电信股份有限公司 | rem=广州电信 | sum=BEPS7930233602026080519806277
+10: GOODS | amt=-10580.0 | cp=珠海市粤珠横酒业有限公司 | rem=采购款 采购款 | sum=OBSS004527134089GIRO0000000000
+11: FEE | amt=-9.0 | cp= | rem= | sum=对公跨行转账汇款手续费
+12: OTHER_WEALTH | amt=-600000.0 | cp=中银理财有限责任公司 | rem= | sum=（机构专属-大湾区）中银理财-乐享天天5号
+13: RECEIPT | amt=20000.0 | cp=广东美的供应链有限公司 | rem=贺腾提交2025年汾酒品牌酒水议价项目退款申请 贺腾提交2025年汾酒品牌酒水议 | sum=HVPS102588001393  202608116897
+14: RECEIPT | amt=20800.0 | cp=深圳爱尔创口腔技术有限公司 | rem=办公费 | sum=BEPS308584001354  202608111207
+15: RECEIPT | amt=15450.0 | cp=广州市鹏盛物业管理有限公司番禺分公司 | rem= | sum=IBPS10210009999620260812800329
+16: EXPENSE | amt=-299.2 | cp=李卓雅 | rem=报销 | sum=OBSS004554238226GIRO0000000000
+17: OTHER | amt=-24384.71 | cp= | rem= | sum=OBSS004554253569GIRO0000000000
+18: TAX | amt=-5983.23 | cp=广州市番禺区代理支库1920360000 | rem=2026081457891135 广东汾源酒业有限公司 91440106MADH | sum=
+19: TAX | amt=-73.07 | cp=广州市番禺区代理支库1920360000 | rem=2026081457898095 广东汾源酒业有限公司 91440106MADH | sum=
+20: GOODS | amt=-8842.73 | cp=中铁诺德物业管理有限公司广州分公司 | rem=水电费 水电费 | sum=OBSS004563584215GIRO0000000000
+21: FEE | amt=-4.5 | cp= | rem= | sum=对公跨行转账汇款手续费
+22: FREIGHT | amt=-3703.55 | cp=广东京邦达供应链科技有限公司 | rem=7月快递费 | sum=OBSS004563594105GIRO0000000000
+23: GOODS | amt=-10067.48 | cp=张丹枫 | rem=招待费 | sum=OBSS004578149893GIRO0000000000
+24: EXPENSE | amt=-533.9 | cp=张丹枫 | rem=办公用品报销 | sum=OBSS004578156039GIRO0000000000
+STATS {'GOODS': 4, 'FEE': 2, 'OTHER_WEALTH': 1, 'RECEIPT': 3, 'EXPENSE': 2, 'OTHER': 1, 'TAX': 2, 'FREIGHT': 1}
+\n=== 农商行 ===
+4: RECEIPT/QR | dir=存入 amt=500.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+5: RECEIPT/QR | dir=存入 amt=4680.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+6: RECEIPT/QR | dir=存入 amt=20.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+7: RECEIPT/QR | dir=存入 amt=2196.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+8: RECEIPT/QR | dir=存入 amt=250.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+9: RECEIPT/QR | dir=存入 amt=2116.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+10: RECEIPT/QR | dir=存入 amt=392.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+11: RECEIPT/QR | dir=存入 amt=7280.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+12: RECEIPT/QR | dir=存入 amt=2350.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+13: RECEIPT/QR | dir=存入 amt=6240.0 cp=支付宝线下收单暂付款 sum=清算 rem=清算
+14: RECEIPT/QR | dir=存入 amt=1800.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+15: RECEIPT/QR | dir=存入 amt=4870.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+16: RECEIPT/QR | dir=存入 amt=160.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+17: RECEIPT/QR | dir=存入 amt=2988.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+18: RECEIPT/QR | dir=存入 amt=4008.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+19: RECEIPT/QR | dir=存入 amt=2300.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+20: FEE | dir=支出 amt=-15.0 cp=手续费收入 sum=手续费 rem=手续费
+21: INTERNAL_TRANSFER | dir=支出 amt=-200000.0 cp=广东汾源酒业有限公司 sum=转汇出 rem=转汇出
+22: RECEIPT/QR | dir=存入 amt=784.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+23: RECEIPT/QR | dir=存入 amt=730.0 cp=微信线下收单暂付款 sum=清算 rem=清算
+24: RECEIPT/QR | dir=存入 amt=2065.0 cp=微信线下收单暂付款 sum=清算 rem=清算

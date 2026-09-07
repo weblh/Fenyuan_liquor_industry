@@ -78,11 +78,15 @@ const FALLBACK_MENUS = [
     name: '业务管理',
     icon: 'ShopOutlined',
     children: [
+      { id: 52, path: '/business/customer-maintain', name: '客户维护监管', icon: 'CustomerServiceOutlined' },
+      { id: 56, path: '/business/price-compare', name: '酒类价格对比', icon: 'FundOutlined' },
+      { id: 60, path: '/business/offsite-sales', name: '异地销售统计', icon: 'EnvironmentOutlined' },
       { id: 27, path: '/business/online-sale', name: '在线销售管理', icon: 'ShoppingCartOutlined' },
       { id: 28, path: '/business/sales-rank', name: '销售排名', icon: 'TrophyOutlined' },
       { id: 29, path: '/business/inventory', name: '汾源酒库存', icon: 'DatabaseOutlined' },
       { id: 30, path: '/business/product-structure', name: '销售产品结构', icon: 'PieChartOutlined' },
       { id: 31, path: '/business/customer-dev', name: '客户开发', icon: 'SolutionOutlined' },
+      { id: 80, path: '/business/cmcloud-sync', name: '管家婆同步', icon: 'CloudSyncOutlined' },
     ],
   },
   {
@@ -91,7 +95,18 @@ const FALLBACK_MENUS = [
     name: '财务管理',
     icon: 'AccountBookOutlined',
     children: [
-      { id: 33, path: '/finance/receivable', name: '应收账款明细', icon: 'MoneyCollectOutlined' },
+      { id: 64, path: '/finance/kingdee-voucher', name: '凭证记录', icon: 'FileSyncOutlined' },
+    ],
+  },
+  {
+    id: 68,
+    path: '/kingdee',
+    name: '金蝶',
+    icon: 'CloudOutlined',
+    children: [
+      { id: 69, path: '/kingdee/credential', name: '账号密码', icon: 'KeyOutlined' },
+      { id: 70, path: '/kingdee/account-set', name: '账套', icon: 'DatabaseOutlined' },
+      { id: 77, path: '/kingdee/bank-voucher', name: '银行流水凭证', icon: 'BankOutlined' },
     ],
   },
 ]

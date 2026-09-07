@@ -14,6 +14,19 @@ const TITLE_MAP = {
   '/settings/config': '参数配置',
   '/log/oper': '操作日志',
   '/log/login': '登录日志',
+  '/business/customer-maintain': '客户维护监管',
+  '/business/price-compare': '酒类价格对比',
+  '/business/offsite-sales': '异地销售统计',
+  '/business/online-sale': '在线销售管理',
+  '/business/sales-rank': '销售排名',
+  '/business/inventory': '汾源酒库存',
+  '/business/product-structure': '销售产品结构',
+  '/business/customer-dev': '客户开发',
+  '/business/cmcloud-sync': '管家婆同步',
+  '/finance/kingdee-voucher': '凭证记录',
+  '/kingdee/credential': '账号密码',
+  '/kingdee/account-set': '账套',
+  '/kingdee/bank-voucher': '银行流水凭证',
 }
 
 export default function BreadcrumbNav() {

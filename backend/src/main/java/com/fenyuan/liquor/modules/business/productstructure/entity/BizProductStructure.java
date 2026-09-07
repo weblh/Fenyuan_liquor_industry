@@ -12,6 +12,8 @@ public class BizProductStructure {
 
     @TableId(type = IdType.AUTO)
     private Long id;
+    private String series;
+    private String productName;
     private String category;
     private BigDecimal quantity;
     private BigDecimal ratio;

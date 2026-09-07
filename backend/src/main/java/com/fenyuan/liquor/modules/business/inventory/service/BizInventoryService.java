@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fenyuan.liquor.common.exception.BusinessException;
 import com.fenyuan.liquor.common.result.PageResult;
+import com.fenyuan.liquor.modules.business.common.BizErpRules;
 import com.fenyuan.liquor.modules.business.inventory.entity.BizInventory;
 import com.fenyuan.liquor.modules.business.inventory.mapper.BizInventoryMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,13 @@ public class BizInventoryService {
         Page<BizInventory> page = mapper.selectPage(new Page<>(current, size),
                 new LambdaQueryWrapper<BizInventory>()
                         .like(StrUtil.isNotBlank(productName), BizInventory::getProductName, productName)
-                        .like(StrUtil.isNotBlank(warehouse), BizInventory::getWarehouse, warehouse)
+                        .and(StrUtil.isNotBlank(warehouse), w -> w.like(BizInventory::getWarehouse, warehouse))
+                        .and(w -> w.like(BizInventory::getWarehouse, "门店前厅")
+                                .or().like(BizInventory::getWarehouse, "后库")
+                                .or().eq(BizInventory::getWarehouse, BizErpRules.COMBINED_WAREHOUSE_LABEL)
+                                .or().eq(BizInventory::getWarehouse, BizErpRules.ALL_WAREHOUSE_SUMMARY_LABEL)
+                                .or().like(BizInventory::getWarehouse, "全部仓库"))
+                        .orderByDesc(BizInventory::getQuantity)
                         .orderByDesc(BizInventory::getId));
         return PageResult.of(page);
     }

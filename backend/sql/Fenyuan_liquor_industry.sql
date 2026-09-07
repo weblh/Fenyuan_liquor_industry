@@ -252,6 +252,70 @@ CREATE TABLE IF NOT EXISTS fin_receivable (
     remark        VARCHAR(255) COMMENT '备注'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='应收账款明细';
 
+CREATE TABLE IF NOT EXISTS biz_customer_maintain (
+    id                   BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    customer_name        VARCHAR(100) NOT NULL COMMENT '客户名称',
+    contact_phone        VARCHAR(50) COMMENT '联系电话',
+    last_purchase_date   DATE COMMENT '最近购买日',
+    days_since_purchase  INT DEFAULT 0 COMMENT '未复购天数',
+    alert_status         TINYINT DEFAULT 0 COMMENT '预警状态(0正常1-60天未复购)',
+    create_by            BIGINT COMMENT '创建人',
+    create_time          DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_by            BIGINT COMMENT '更新人',
+    update_time          DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    del_flag             TINYINT DEFAULT 0 COMMENT '删除标志',
+    remark               VARCHAR(255) COMMENT '备注'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客户维护监管';
+
+CREATE TABLE IF NOT EXISTS biz_price_compare (
+    id            BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    product_name  VARCHAR(100) NOT NULL COMMENT '产品名称',
+    sale_price    DECIMAL(18, 2) DEFAULT 0 COMMENT '目前销售价',
+    jd_price      DECIMAL(18, 2) COMMENT '京东价',
+    tmall_price   DECIMAL(18, 2) COMMENT '天猫价',
+    crawl_time    DATETIME COMMENT '抓取时间',
+    create_by     BIGINT COMMENT '创建人',
+    create_time   DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_by     BIGINT COMMENT '更新人',
+    update_time   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    del_flag      TINYINT DEFAULT 0 COMMENT '删除标志',
+    remark        VARCHAR(255) COMMENT '备注'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='酒类价格对比';
+
+CREATE TABLE IF NOT EXISTS biz_offsite_sale (
+    id            BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    product_name  VARCHAR(100) NOT NULL COMMENT '产品名称',
+    quantity      DECIMAL(18, 2) DEFAULT 0 COMMENT '销量',
+    province      VARCHAR(50) COMMENT '省份',
+    city          VARCHAR(50) COMMENT '城市',
+    address       VARCHAR(255) COMMENT '详细地址',
+    source_type   VARCHAR(20) COMMENT '来源ERP/JD',
+    order_no      VARCHAR(100) COMMENT '单据号',
+    create_by     BIGINT COMMENT '创建人',
+    create_time   DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_by     BIGINT COMMENT '更新人',
+    update_time   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    del_flag      TINYINT DEFAULT 0 COMMENT '删除标志',
+    remark        VARCHAR(255) COMMENT '备注'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='异地销售统计';
+
+CREATE TABLE IF NOT EXISTS fin_kingdee_voucher (
+    id            BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+    bank_flow_no  VARCHAR(100) NOT NULL COMMENT '银行流水号',
+    counterparty  VARCHAR(100) COMMENT '对方户名',
+    amount        DECIMAL(18, 2) DEFAULT 0 COMMENT '金额',
+    flow_date     DATE COMMENT '流水日期',
+    sync_status   TINYINT DEFAULT 0 COMMENT '同步状态(0待同步1已写入2失败)',
+    voucher_no    VARCHAR(100) COMMENT '金蝶凭证号',
+    sync_time     DATETIME COMMENT '同步时间',
+    create_by     BIGINT COMMENT '创建人',
+    create_time   DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_by     BIGINT COMMENT '更新人',
+    update_time   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    del_flag      TINYINT DEFAULT 0 COMMENT '删除标志',
+    remark        VARCHAR(255) COMMENT '备注'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='金蝶凭证同步';
+
 -- -------------------- 初始化数据 --------------------
 
 INSERT INTO sys_dept (id, parent_id, name, code, leader, phone, sort, status, del_flag) VALUES
@@ -296,13 +360,17 @@ INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, ic
 (24, 5, '删除部门', NULL, NULL, 'system:dept:delete', 2, NULL, 3, 1, 1, 0),
 (25, 10, '修改配置', NULL, NULL, 'system:config:edit', 2, NULL, 1, 1, 1, 0),
 (26, 0, '业务管理', '/business', 'Layout', NULL, 0, 'ShopOutlined', 4, 1, 1, 0),
-(27, 26, '在线销售管理', '/business/online-sale', 'business/onlineSale/index', 'business:onlineSale:list', 1, 'ShoppingCartOutlined', 1, 1, 1, 0),
-(28, 26, '销售排名', '/business/sales-rank', 'business/salesRank/index', 'business:salesRank:list', 1, 'TrophyOutlined', 2, 1, 1, 0),
-(29, 26, '汾源酒库存', '/business/inventory', 'business/inventory/index', 'business:inventory:list', 1, 'DatabaseOutlined', 3, 1, 1, 0),
-(30, 26, '销售产品结构', '/business/product-structure', 'business/productStructure/index', 'business:productStructure:list', 1, 'PieChartOutlined', 4, 1, 1, 0),
-(31, 26, '客户开发', '/business/customer-dev', 'business/customerDev/index', 'business:customerDev:list', 1, 'SolutionOutlined', 5, 1, 1, 0),
+(52, 26, '客户维护监管', '/business/customer-maintain', 'business/customerMaintain/index', 'business:customerMaintain:list', 1, 'CustomerServiceOutlined', 1, 1, 1, 0),
+(56, 26, '酒类价格对比', '/business/price-compare', 'business/priceCompare/index', 'business:priceCompare:list', 1, 'FundOutlined', 2, 1, 1, 0),
+(60, 26, '异地销售统计', '/business/offsite-sales', 'business/offsiteSales/index', 'business:offsiteSale:list', 1, 'EnvironmentOutlined', 3, 1, 1, 0),
+(27, 26, '在线销售管理', '/business/online-sale', 'business/onlineSale/index', 'business:onlineSale:list', 1, 'ShoppingCartOutlined', 4, 1, 1, 0),
+(28, 26, '销售排名', '/business/sales-rank', 'business/salesRank/index', 'business:salesRank:list', 1, 'TrophyOutlined', 5, 1, 1, 0),
+(29, 26, '汾源酒库存', '/business/inventory', 'business/inventory/index', 'business:inventory:list', 1, 'DatabaseOutlined', 6, 1, 1, 0),
+(30, 26, '销售产品结构', '/business/product-structure', 'business/productStructure/index', 'business:productStructure:list', 1, 'PieChartOutlined', 7, 1, 1, 0),
+(31, 26, '客户开发', '/business/customer-dev', 'business/customerDev/index', 'business:customerDev:list', 1, 'SolutionOutlined', 8, 1, 1, 0),
 (32, 0, '财务管理', '/finance', 'Layout', NULL, 0, 'AccountBookOutlined', 5, 1, 1, 0),
 (33, 32, '应收账款明细', '/finance/receivable', 'finance/receivable/index', 'finance:receivable:list', 1, 'MoneyCollectOutlined', 1, 1, 1, 0),
+(64, 32, '金蝶凭证同步', '/finance/kingdee-voucher', 'finance/kingdeeVoucher/index', 'finance:kingdeeVoucher:list', 1, 'FileSyncOutlined', 2, 1, 1, 0),
 (34, 27, '新增', NULL, NULL, 'business:onlineSale:add', 2, NULL, 1, 1, 1, 0),
 (35, 27, '编辑', NULL, NULL, 'business:onlineSale:edit', 2, NULL, 2, 1, 1, 0),
 (36, 27, '删除', NULL, NULL, 'business:onlineSale:delete', 2, NULL, 3, 1, 1, 0),
@@ -320,7 +388,19 @@ INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, ic
 (48, 31, '删除', NULL, NULL, 'business:customerDev:delete', 2, NULL, 3, 1, 1, 0),
 (49, 33, '新增', NULL, NULL, 'finance:receivable:add', 2, NULL, 1, 1, 1, 0),
 (50, 33, '编辑', NULL, NULL, 'finance:receivable:edit', 2, NULL, 2, 1, 1, 0),
-(51, 33, '删除', NULL, NULL, 'finance:receivable:delete', 2, NULL, 3, 1, 1, 0);
+(51, 33, '删除', NULL, NULL, 'finance:receivable:delete', 2, NULL, 3, 1, 1, 0),
+(53, 52, '新增', NULL, NULL, 'business:customerMaintain:add', 2, NULL, 1, 1, 1, 0),
+(54, 52, '编辑', NULL, NULL, 'business:customerMaintain:edit', 2, NULL, 2, 1, 1, 0),
+(55, 52, '删除', NULL, NULL, 'business:customerMaintain:delete', 2, NULL, 3, 1, 1, 0),
+(57, 56, '新增', NULL, NULL, 'business:priceCompare:add', 2, NULL, 1, 1, 1, 0),
+(58, 56, '编辑', NULL, NULL, 'business:priceCompare:edit', 2, NULL, 2, 1, 1, 0),
+(59, 56, '删除', NULL, NULL, 'business:priceCompare:delete', 2, NULL, 3, 1, 1, 0),
+(61, 60, '新增', NULL, NULL, 'business:offsiteSale:add', 2, NULL, 1, 1, 1, 0),
+(62, 60, '编辑', NULL, NULL, 'business:offsiteSale:edit', 2, NULL, 2, 1, 1, 0),
+(63, 60, '删除', NULL, NULL, 'business:offsiteSale:delete', 2, NULL, 3, 1, 1, 0),
+(65, 64, '新增', NULL, NULL, 'finance:kingdeeVoucher:add', 2, NULL, 1, 1, 1, 0),
+(66, 64, '编辑', NULL, NULL, 'finance:kingdeeVoucher:edit', 2, NULL, 2, 1, 1, 0),
+(67, 64, '删除', NULL, NULL, 'finance:kingdeeVoucher:delete', 2, NULL, 3, 1, 1, 0);
 
 INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
 
@@ -358,3 +438,22 @@ INSERT INTO biz_customer_dev (id, name, amount, remark, del_flag) VALUES
 INSERT INTO fin_receivable (id, name, amount, remark, del_flag) VALUES
 (1, '太原经销商', 156000.00, '账期30天', 0),
 (2, '大同经销商', 98000.00, '部分回款', 0);
+
+INSERT INTO biz_customer_maintain (id, customer_name, contact_phone, last_purchase_date, days_since_purchase, alert_status, remark, del_flag) VALUES
+(1, '晋中商贸有限公司', '13800001111', '2026-05-10', 108, 1, '超60天未复购，推送主看板', 0),
+(2, '吕梁烟酒行', '13900002222', '2026-07-20', 37, 0, '近期有复购', 0),
+(3, '运城名酒汇', '13700003333', '2026-04-01', 147, 1, '重点跟进客户', 0);
+
+INSERT INTO biz_price_compare (id, product_name, sale_price, jd_price, tmall_price, crawl_time, remark, del_flag) VALUES
+(1, '汾源原浆 500ml', 298.00, 318.00, 309.00, '2026-08-25 10:00:00', '销售价低于京东/天猫', 0),
+(2, '汾源陈酿 42度', 168.00, 159.00, 162.00, '2026-08-25 10:00:00', '销售价略高于平台', 0);
+
+INSERT INTO biz_offsite_sale (id, product_name, quantity, province, city, address, source_type, order_no, remark, del_flag) VALUES
+(1, '汾源原浆', 120.00, '广东省', '广州市', '天河区体育西路', 'JD', 'JD20260825001', '京东物流异地单', 0),
+(2, '汾源陈酿', 80.00, '北京市', '北京市', '朝阳区建国路', 'ERP', 'ERP20260825002', 'ERP异地发货', 0),
+(3, '汾源礼盒', 45.00, '上海市', '上海市', '浦东新区陆家嘴', 'JD', 'JD20260825003', NULL, 0),
+(4, '汾源原浆', 60.00, '四川省', '成都市', '武侯区人民南路', 'ERP', 'ERP20260825004', NULL, 0);
+
+INSERT INTO fin_kingdee_voucher (id, bank_flow_no, counterparty, amount, flow_date, sync_status, voucher_no, sync_time, remark, del_flag) VALUES
+(1, 'BK20260825001', '太原经销商', 50000.00, '2026-08-24', 1, 'KD-PZ-20260824-001', '2026-08-24 18:30:00', '已根据银行流水写入金蝶', 0),
+(2, 'BK20260825002', '大同经销商', 28000.00, '2026-08-25', 0, NULL, NULL, '待同步金蝶凭证', 0);

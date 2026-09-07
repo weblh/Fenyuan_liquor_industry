@@ -92,21 +92,31 @@ INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, ic
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
 (26, 0, '业务管理', '/business', 'Layout', NULL, 0, 'ShopOutlined', 4, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
-(27, 26, '在线销售管理', '/business/online-sale', 'business/onlineSale/index', 'business:onlineSale:list', 1, 'ShoppingCartOutlined', 1, 1, 1, 0);
+(52, 26, '客户维护监管', '/business/customer-maintain', 'business/customerMaintain/index', 'business:customerMaintain:list', 1, 'CustomerServiceOutlined', 1, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
-(28, 26, '销售排名', '/business/sales-rank', 'business/salesRank/index', 'business:salesRank:list', 1, 'TrophyOutlined', 2, 1, 1, 0);
+(56, 26, '酒类价格对比', '/business/price-compare', 'business/priceCompare/index', 'business:priceCompare:list', 1, 'FundOutlined', 2, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
-(29, 26, '汾源酒库存', '/business/inventory', 'business/inventory/index', 'business:inventory:list', 1, 'DatabaseOutlined', 3, 1, 1, 0);
+(60, 26, '异地销售统计', '/business/offsite-sales', 'business/offsiteSales/index', 'business:offsiteSale:list', 1, 'EnvironmentOutlined', 3, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
-(30, 26, '销售产品结构', '/business/product-structure', 'business/productStructure/index', 'business:productStructure:list', 1, 'PieChartOutlined', 4, 1, 1, 0);
+(27, 26, '在线销售管理', '/business/online-sale', 'business/onlineSale/index', 'business:onlineSale:list', 1, 'ShoppingCartOutlined', 4, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
-(31, 26, '客户开发', '/business/customer-dev', 'business/customerDev/index', 'business:customerDev:list', 1, 'SolutionOutlined', 5, 1, 1, 0);
+(28, 26, '销售排名', '/business/sales-rank', 'business/salesRank/index', 'business:salesRank:list', 1, 'TrophyOutlined', 5, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(29, 26, '汾源酒库存', '/business/inventory', 'business/inventory/index', 'business:inventory:list', 1, 'DatabaseOutlined', 6, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(30, 26, '销售产品结构', '/business/product-structure', 'business/productStructure/index', 'business:productStructure:list', 1, 'PieChartOutlined', 7, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(31, 26, '客户开发', '/business/customer-dev', 'business/customerDev/index', 'business:customerDev:list', 1, 'SolutionOutlined', 8, 1, 1, 0);
 
 -- 财务管理
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
 (32, 0, '财务管理', '/finance', 'Layout', NULL, 0, 'AccountBookOutlined', 5, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
-(33, 32, '应收账款明细', '/finance/receivable', 'finance/receivable/index', 'finance:receivable:list', 1, 'MoneyCollectOutlined', 1, 1, 1, 0);
+(33, 32, '应收账款明细', '/finance/receivable', 'finance/receivable/index', 'finance:receivable:list', 1, 'MoneyCollectOutlined', 1, 0, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(64, 32, '凭证记录', '/finance/kingdee-voucher', 'finance/kingdeeVoucher/index', 'finance:kingdeeVoucher:list', 1, 'FileSyncOutlined', 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(80, 26, '管家婆同步', '/business/cmcloud-sync', 'business/cmcloudSync/index', 'business:cmcloud:sync', 1, 'CloudSyncOutlined', 9, 1, 1, 0);
 
 -- 业务/财务按钮权限
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
@@ -145,6 +155,56 @@ INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, ic
 (50, 33, '编辑', NULL, NULL, 'finance:receivable:edit', 2, NULL, 2, 1, 1, 0);
 INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
 (51, 33, '删除', NULL, NULL, 'finance:receivable:delete', 2, NULL, 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(53, 52, '新增', NULL, NULL, 'business:customerMaintain:add', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(54, 52, '编辑', NULL, NULL, 'business:customerMaintain:edit', 2, NULL, 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(55, 52, '删除', NULL, NULL, 'business:customerMaintain:delete', 2, NULL, 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(57, 56, '新增', NULL, NULL, 'business:priceCompare:add', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(58, 56, '编辑', NULL, NULL, 'business:priceCompare:edit', 2, NULL, 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(59, 56, '删除', NULL, NULL, 'business:priceCompare:delete', 2, NULL, 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(61, 60, '新增', NULL, NULL, 'business:offsiteSale:add', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(62, 60, '编辑', NULL, NULL, 'business:offsiteSale:edit', 2, NULL, 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(63, 60, '删除', NULL, NULL, 'business:offsiteSale:delete', 2, NULL, 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(65, 64, '新增', NULL, NULL, 'finance:kingdeeVoucher:add', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(66, 64, '编辑', NULL, NULL, 'finance:kingdeeVoucher:edit', 2, NULL, 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(67, 64, '删除', NULL, NULL, 'finance:kingdeeVoucher:delete', 2, NULL, 3, 1, 1, 0);
+
+-- 金蝶管理
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(68, 0, '金蝶', '/kingdee', 'Layout', NULL, 0, 'CloudOutlined', 6, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(69, 68, '账号密码', '/kingdee/credential', 'kingdee/credential/index', 'kingdee:credential:list', 1, 'KeyOutlined', 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(70, 68, '账套', '/kingdee/account-set', 'kingdee/accountSet/index', 'kingdee:accountSet:list', 1, 'DatabaseOutlined', 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(71, 69, '新增', NULL, NULL, 'kingdee:credential:add', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(72, 69, '编辑', NULL, NULL, 'kingdee:credential:edit', 2, NULL, 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(73, 69, '删除', NULL, NULL, 'kingdee:credential:delete', 2, NULL, 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(74, 70, '新增', NULL, NULL, 'kingdee:accountSet:add', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(75, 70, '编辑', NULL, NULL, 'kingdee:accountSet:edit', 2, NULL, 2, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(76, 70, '删除', NULL, NULL, 'kingdee:accountSet:delete', 2, NULL, 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(77, 68, '银行流水凭证', '/kingdee/bank-voucher', 'kingdee/bankVoucher/index', 'kingdee:bankVoucher:list', 1, 'BankOutlined', 3, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(78, 77, '导入流水', NULL, NULL, 'kingdee:bankVoucher:import', 2, NULL, 1, 1, 1, 0);
+INSERT INTO sys_menu (id, parent_id, name, path, component, permission, type, icon, sort, visible, status, del_flag) VALUES
+(79, 77, '写入金蝶', NULL, NULL, 'kingdee:bankVoucher:write', 2, NULL, 2, 1, 1, 0);
 
 -- admin -> ROLE_ADMIN
 INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);
@@ -160,39 +220,22 @@ INSERT INTO sys_config (id, name, config_key, config_value, type, group_name, st
 INSERT INTO sys_config (id, name, config_key, config_value, type, group_name, status, is_system, del_flag) VALUES
 (3, '系统版本', 'system.version', 'v1.0.0', 'string', 'system', 1, 1, 0);
 
--- 业务示例数据
-INSERT INTO biz_online_sale (id, sale_amount, ship_amount, payment_amount, period_name, del_flag) VALUES
-(1, 1280000.00, 980000.00, 860000.00, '2026年1月', 0);
-INSERT INTO biz_online_sale (id, sale_amount, ship_amount, payment_amount, period_name, del_flag) VALUES
-(2, 1560000.00, 1320000.00, 1100000.00, '2026年2月', 0);
+-- 业务数据由管家婆 ERP 同步，不预置演示数据
 
-INSERT INTO biz_sales_rank (id, company_name, amount, sales_ratio, trend, del_flag) VALUES
-(1, '太原经销商', 520000.00, 28.50, 1, 0);
-INSERT INTO biz_sales_rank (id, company_name, amount, sales_ratio, trend, del_flag) VALUES
-(2, '大同经销商', 410000.00, 22.40, -1, 0);
-INSERT INTO biz_sales_rank (id, company_name, amount, sales_ratio, trend, del_flag) VALUES
-(3, '临汾经销商', 380000.00, 20.80, 1, 0);
+INSERT INTO fin_kingdee_voucher (id, bank_flow_no, counterparty, amount, flow_date, sync_status, voucher_no, sync_time, remark, del_flag) VALUES
+(1, 'BK20260825001', '太原经销商', 50000.00, '2026-08-24', 1, 'KD-PZ-20260824-001', '2026-08-24 18:30:00', '已根据银行流水写入金蝶', 0);
+INSERT INTO fin_kingdee_voucher (id, bank_flow_no, counterparty, amount, flow_date, sync_status, voucher_no, sync_time, remark, del_flag) VALUES
+(2, 'BK20260825002', '大同经销商', 28000.00, '2026-08-25', 0, NULL, NULL, '待同步金蝶凭证', 0);
 
-INSERT INTO biz_inventory (id, product_name, spec, quantity, amount, warehouse, del_flag) VALUES
-(1, '汾源原浆', '500ml*6', 1200.00, 360000.00, '总库', 0);
-INSERT INTO biz_inventory (id, product_name, spec, quantity, amount, warehouse, del_flag) VALUES
-(2, '汾源陈酿', '42度 500ml', 800.00, 240000.00, '一号库', 0);
-INSERT INTO biz_inventory (id, product_name, spec, quantity, amount, warehouse, del_flag) VALUES
-(3, '汾源礼盒', '两瓶装', 350.00, 175000.00, '二号库', 0);
+-- 金蝶账号密码（黄增峰 / zf13643000166）
+INSERT INTO kingdee_credential (id, name, kingdee_url, username, password, status, remark) VALUES
+(1, '黄增峰', 'https://dichanerp.huaxianggroup.cn/k3cloud/', '黄增峰', 'zf13643000166', 1, '汾源酒业金蝶登录账号');
 
-INSERT INTO biz_product_structure (id, category, quantity, ratio, customer_source, del_flag) VALUES
-(1, '原浆系列', 4500.00, 35.00, '经销商', 0);
-INSERT INTO biz_product_structure (id, category, quantity, ratio, customer_source, del_flag) VALUES
-(2, '陈酿系列', 3200.00, 25.00, '商超', 0);
-INSERT INTO biz_product_structure (id, category, quantity, ratio, customer_source, del_flag) VALUES
-(3, '礼盒系列', 2100.00, 16.50, '团购', 0);
+-- 金蝶账套（111 广东汾源酒业有限公司，建行 719878715101）
+INSERT INTO kingdee_account_set (id, credential_id, account_name, db_id, org_company_code, use_org_code, default_form_id, default_accounting_period, bank_account_no, is_default, status, description) VALUES
+(1, 1, '广东汾源酒业有限公司', '61cbb7b2d5e132', '111', '111', 'GL_VOUCHER', '202607', '719878715101', 1, 1, '组织111 广东汾源酒业有限公司，账簿编码111');
 
-INSERT INTO biz_customer_dev (id, name, amount, remark, del_flag) VALUES
-(1, '晋中商贸有限公司', 86000.00, '新开拓区域经销', 0);
-INSERT INTO biz_customer_dev (id, name, amount, remark, del_flag) VALUES
-(2, '吕梁烟酒行', 42000.00, '首单合作', 0);
-
-INSERT INTO fin_receivable (id, name, amount, remark, del_flag) VALUES
-(1, '太原经销商', 156000.00, '账期30天', 0);
-INSERT INTO fin_receivable (id, name, amount, remark, del_flag) VALUES
-(2, '大同经销商', 98000.00, '部分回款', 0);
+-- 金蝶银行流水渠道（建行 719878715101）
+INSERT INTO kingdee_bank_channel (id, channel_key, company_code, company_name, bank_code, bank_name, account_no, account_name, excel_template, kingdee_account_id, kingdee_org_company_code, kingdee_bank_account, kingdee_bank_dimension, qr_fee_exempt, sort_order, enabled, remark) VALUES
+(1, 'FENYUAN_BOC', '111', '广东汾源酒业', 'BOC', '中国银行', '719878715101', '广东汾源酒业有限公司', 'BOC_DETAIL', 1, '111', '1002.15', '007', 0, 1, 1, '中国银行广州番禺祈福支行 719878715101（科目1002.15/维度007）；通联/美团扫码按摘要FEE拆分'),
+(2, 'FENYUAN_RCB', '111', '广东汾源酒业', 'RCB', '农村商业银行', '00561580000000717', '广东汾源酒业有限公司', 'RCB_RECEIPT', 1, '111', '1002.31', 'NS001', 1, 2, 1, '广州农商行化龙支行 00561580000000717（科目1002.31/维度NS001）；微信收款免手续费');

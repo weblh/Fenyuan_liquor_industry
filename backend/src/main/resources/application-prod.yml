@@ -17,3 +17,10 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   db-type: mysql
+
+cmcloud:
+  sync-enabled: true
+  base-info-path: D:/F/CMCloud/Data/BaseInfo
+  api-base-url: http://127.0.0.1:45100
+  api-mode: local
+  bill-sync-days: 365

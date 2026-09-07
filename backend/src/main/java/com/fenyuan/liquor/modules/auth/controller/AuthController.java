@@ -3,6 +3,7 @@ package com.fenyuan.liquor.modules.auth.controller;
 import com.fenyuan.liquor.common.annotation.Log;
 import com.fenyuan.liquor.common.result.Result;
 import com.fenyuan.liquor.modules.auth.dto.CaptchaResponse;
+import com.fenyuan.liquor.modules.auth.dto.DashboardExchangeRequest;
 import com.fenyuan.liquor.modules.auth.dto.LoginRequest;
 import com.fenyuan.liquor.modules.auth.dto.LoginResponse;
 import com.fenyuan.liquor.modules.auth.dto.UserInfoVO;
@@ -33,6 +34,14 @@ public class AuthController {
     @PostMapping("/login")
     public Result<LoginResponse> login(@Validated @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         return Result.ok(authService.login(request, httpRequest));
+    }
+
+    @ApiOperation("广州总大屏令牌换发")
+    @PostMapping("/dashboard-exchange")
+    public Result<LoginResponse> dashboardExchange(
+            @Validated @RequestBody DashboardExchangeRequest request,
+            HttpServletRequest httpRequest) {
+        return Result.ok(authService.dashboardExchange(request, httpRequest));
     }
 
     @ApiOperation("退出登录")
