@@ -3,6 +3,7 @@ import AuthGuard from './permission'
 import MainLayout from '@/components/Layout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
+import SubDashboard from '@/pages/SubDashboard'
 import UserPage from '@/pages/System/User'
 import RolePage from '@/pages/System/Role'
 import MenuPage from '@/pages/System/Menu'
@@ -43,6 +44,7 @@ const router = createBrowserRouter(
       children: [
         { index: true, element: <Navigate to="/dashboard" replace /> },
         { path: 'dashboard', element: <Dashboard /> },
+        { path: 'sub-dashboard', element: <SubDashboard /> },
         { path: 'system/user', element: <UserPage /> },
         { path: 'system/role', element: <RolePage /> },
         { path: 'system/menu', element: <MenuPage /> },

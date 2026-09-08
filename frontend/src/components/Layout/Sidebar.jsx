@@ -39,6 +39,16 @@ const DASHBOARD_ITEM = {
   status: 1,
 }
 
+const SUB_DASHBOARD_ITEM = {
+  id: 90,
+  path: '/sub-dashboard',
+  name: '附页',
+  icon: 'AppstoreOutlined',
+  type: 1,
+  visible: 1,
+  status: 1,
+}
+
 const FALLBACK_MENUS = [
   DASHBOARD_ITEM,
   {
@@ -109,6 +119,15 @@ const FALLBACK_MENUS = [
       { id: 77, path: '/kingdee/bank-voucher', name: '银行流水凭证', icon: 'BankOutlined' },
     ],
   },
+  {
+    id: 90,
+    path: '/sub-dashboard',
+    name: '附页',
+    icon: 'AppstoreOutlined',
+    type: 1,
+    visible: 1,
+    status: 1,
+  },
 ]
 
 export default function Sidebar() {
@@ -123,7 +142,10 @@ export default function Sidebar() {
     const withHome = source.some((m) => m.path === '/dashboard')
       ? source
       : [DASHBOARD_ITEM, ...source]
-    return mapMenusToItems(withHome)
+    const withSub = withHome.some((m) => m.path === '/sub-dashboard')
+      ? withHome
+      : [...withHome, SUB_DASHBOARD_ITEM]
+    return mapMenusToItems(withSub)
   }, [menus])
 
   const selectedKeys = [location.pathname]
