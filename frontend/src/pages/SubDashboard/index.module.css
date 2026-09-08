@@ -331,18 +331,18 @@
 
 .kpiGrid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(8, minmax(95px, 1fr));
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .kpiCard {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   border: 1px solid rgba(31, 26, 23, 0.08);
-  border-radius: 12px;
+  border-radius: 10px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 248, 241, 0.96));
   box-shadow:
@@ -381,13 +381,13 @@
 }
 
 .kpiIcon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: 15px;
   flex-shrink: 0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -404,7 +404,7 @@
 }
 
 .kpiLabel .biZh {
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #5a5048;
   white-space: nowrap;
@@ -424,7 +424,7 @@
 }
 
 .kpiValue {
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--ink);
   line-height: 1.2;
@@ -456,43 +456,174 @@
 .olive .kpiIcon { background: linear-gradient(135deg, rgba(107, 143, 113, 0.22), rgba(107, 143, 113, 0.08)); color: #4f7356; }
 .bronze .kpiIcon { background: linear-gradient(135deg, rgba(160, 82, 45, 0.2), rgba(160, 82, 45, 0.06)); color: #8a4518; }
 
+/* hero 通栏已拆进 mainGrid 作为 panelHero，这里隐藏 */
+.hero {
+  display: none !important;
+}
+
 .mainGrid {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 1.05fr 1.35fr 1fr;
-  grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr);
+  /* col1 窄（hero 变窄），col2-4 宽（下方面板更宽） */
+  grid-template-columns: 0.72fr 1.2fr 1.8fr 1.2fr;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
 }
 
-.panelRetention {
-  grid-row: 1 / 2;
+/* 大标题 — 蓝框，col1 跨 3 行 */
+.panelHero {
+  grid-row: 1 / 4;
   grid-column: 1 / 2;
+  /* 覆盖通用 .panel 白卡样式 */
+  background:
+    linear-gradient(135deg, rgba(139, 26, 26, 0.96), rgba(90, 18, 18, 0.92)),
+    #8b1a1a !important;
+  border: 1px solid rgba(201, 162, 39, 0.25) !important;
+  color: #f7f1e8;
+  box-shadow:
+    0 10px 28px rgba(139, 26, 26, 0.22),
+    inset 0 1px 0 rgba(255, 230, 200, 0.18) !important;
+  padding: 18px 18px !important;
+  border-radius: 12px !important;
+  position: relative;
+  overflow: hidden;
+  transition: none !important;
 }
 
+.panelHero .heroText h1 .biZh {
+  font-size: 32px;
+  letter-spacing: 0.06em;
+}
+
+.panelHero .heroText h1 .heroEn {
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.panelHero .heroText p {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.panelHero::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #c9a227 0%, rgba(201, 162, 39, 0.35) 60%, transparent 100%);
+  pointer-events: none;
+}
+
+.panelHero::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 230, 200, 0.2), transparent 70%);
+  pointer-events: none;
+}
+
+.panelHero:hover {
+  box-shadow:
+    0 10px 28px rgba(139, 26, 26, 0.22),
+    inset 0 1px 0 rgba(255, 230, 200, 0.18) !important;
+  border-color: rgba(201, 162, 39, 0.25) !important;
+}
+
+/* 通用 panel 竖条隐藏 —— panelHero 自己有金色底部光带 */
+.panelHero.panel::before {
+  display: none;
+}
+
+.panelHero .heroText {
+  z-index: 1;
+  position: relative;
+}
+
+.panelHero .heroMeta {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  align-items: flex-start;
+  padding: 6px 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.panelHero .metaLine {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.panelHero .heroActions {
+  margin-top: 6px;
+}
+
+.panelHero .refreshBtn {
+  font-size: 11px;
+  padding: 4px 10px;
+  height: auto;
+}
+
+/* 销售产品结构 — 绿框 col2 row1-2 */
+.panelProductMix {
+  grid-row: 1 / 3;
+  grid-column: 2 / 3;
+}
+
+/* 异地销售地图 — col3 row1-2 */
 .mapPanel {
-  grid-row: 1 / 2;
-  grid-column: 2 / 3;
-}
-
-.mainGrid > .panel:nth-child(3) {
-  grid-row: 1 / 2;
+  grid-row: 1 / 3;
   grid-column: 3 / 4;
 }
 
-.mainGrid > .panel:nth-child(4) {
-  grid-row: 2 / 3;
-  grid-column: 1 / 2;
+/* 在线销售趋势 — col4 row1-2 */
+.panelOnlineTrend {
+  grid-row: 1 / 3;
+  grid-column: 4 / 5;
 }
 
-.mainGrid > .panel:nth-child(5) {
-  grid-row: 2 / 3;
+/* 库存概况 + 客户开发 — 红框 col2 row2-3 */
+.panelSplit {
+  grid-row: 2 / 4;
   grid-column: 2 / 3;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.mainGrid > .panelSplit {
-  grid-row: 2 / 3;
+.splitHalf {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 10px 12px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 26, 26, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 248, 241, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* 经销商销售排名 — col3 row3 */
+.panelRank {
+  grid-row: 3 / 4;
   grid-column: 3 / 4;
+}
+
+/* 60天未复购客户 — col4 row3 */
+.panelRetention {
+  grid-row: 3 / 4;
+  grid-column: 4 / 5;
 }
 
 .panel {
@@ -771,20 +902,6 @@
   background: transparent;
 }
 
-.panelSplit {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 6px;
-  padding: 8px 10px;
-}
-
-.splitHalf {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 .daysBadge {
   display: inline-flex;
   align-items: center;
@@ -890,17 +1007,19 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  /* 2 列压缩版 */
   .mainGrid {
-    grid-template-columns: 1fr 1.2fr;
-    grid-template-rows: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1.1fr 1fr;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
   }
 
-  .panelRetention { grid-area: 1 / 1 / 2 / 2; }
-  .mapPanel { grid-area: 1 / 2 / 2 / 3; }
-  .mainGrid > .panel:nth-child(3) { grid-area: 2 / 1 / 3 / 2; }
-  .mainGrid > .panel:nth-child(4) { grid-area: 2 / 2 / 3 / 3; }
-  .mainGrid > .panel:nth-child(5) { grid-area: 3 / 1 / 4 / 2; }
-  .mainGrid > .panelSplit { grid-area: 3 / 2 / 4 / 3; }
+  .panelHero         { grid-area: 1 / 1 / 4 / 2; }
+  .panelProductMix   { grid-area: 1 / 2 / 3 / 3; }
+  .mapPanel          { grid-area: 3 / 1 / 4 / 2; }
+  .panelOnlineTrend  { grid-area: 3 / 2 / 4 / 3; }
+  .panelSplit        { grid-area: 4 / 1 / 5 / 2; }
+  .panelRank         { grid-area: 4 / 2 / 5 / 3; }
+  .panelRetention    { display: none; }
 }
 
 @media (max-width: 1100px) {
@@ -920,8 +1039,7 @@
     height: auto;
   }
 
-  .mainGrid > .panel,
-  .mainGrid > .panelSplit {
+  .mainGrid > .panel {
     min-height: 280px;
   }
 

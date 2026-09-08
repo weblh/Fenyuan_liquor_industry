@@ -432,8 +432,9 @@ export default function SubDashboard() {
         {
           type: 'map',
           map: 'china',
-          roam: false,
+          roam: true,
           zoom: 1.05,
+          scaleLimit: { min: 0.6, max: 4 },
           layoutCenter: ['54%', '50%'],
           layoutSize: '92%',
           aspectScale: 0.82,
@@ -575,50 +576,7 @@ export default function SubDashboard() {
 
   return (
     <div ref={pageRef} className={`${styles.page} ${fullscreen ? styles.fullscreen : ''} ${styles.oneScreen}`}>
-      <div className={styles.hero}>
-        <div className={styles.heroText}>
-          <BiTitle
-            as="div"
-            className={styles.eyebrow}
-            zh="经营数据看板"
-            en="Operations Dashboard"
-          />
-          <h1>
-            <span className={styles.biZh}>{title || '汾源酒业经营体'}</span>
-            <span className={styles.heroEn}>Fenyuan Liquor Operations Board</span>
-          </h1>
-          <p>
-            你好，{name}。客户维护 · 比价 · 异地销售一屏总览
-            <span className={styles.heroSubEn}>Customer · Pricing · Offsite Sales at a Glance</span>
-          </p>
-        </div>
-        <div className={styles.heroMeta}>
-          <span className={styles.metaLine}>
-            <span className={styles.metaZh}>数据更新</span>
-            <span className={styles.metaEn}>Updated</span>
-            <span className={styles.metaVal}>{updatedAt || '--'}</span>
-          </span>
-          <Space size={8} className={styles.heroActions}>
-            <Button
-              type="primary"
-              icon={fullscreen ? <CompressOutlined /> : <ExpandOutlined />}
-              onClick={toggleFullscreen}
-              className={styles.refreshBtn}
-            >
-              {fullscreen ? '退出全屏 Exit' : '全屏 Full Screen'}
-            </Button>
-            <Button
-              type="primary"
-              icon={<ReloadOutlined />}
-              loading={loading}
-              onClick={load}
-              className={styles.refreshBtn}
-            >
-              刷新 Refresh
-            </Button>
-          </Space>
-        </div>
-      </div>
+      <div className={styles.hero} style={{ display: 'none' }} />
 
       <Spin spinning={loading} className={styles.boardSpin} wrapperClassName={styles.boardSpinWrap}>
         <div className={styles.board}>
@@ -652,6 +610,51 @@ export default function SubDashboard() {
           </div>
 
           <div className={styles.mainGrid}>
+            <section className={`${styles.panel} ${styles.panelHero}`}>
+              <div className={styles.heroText}>
+                <BiTitle
+                  as="div"
+                  className={styles.eyebrow}
+                  zh="经营数据看板"
+                  en="Operations Dashboard"
+                />
+                <h1>
+                  <span className={styles.biZh}>{title || '汾源酒业经营体'}</span>
+                  <span className={styles.heroEn}>Fenyuan Liquor Operations Board</span>
+                </h1>
+                <p>
+                  你好，{name}。客户维护 · 比价 · 异地销售一屏总览
+                  <span className={styles.heroSubEn}>Customer · Pricing · Offsite Sales at a Glance</span>
+                </p>
+              </div>
+              <div className={styles.heroMeta}>
+                <span className={styles.metaLine}>
+                  <span className={styles.metaZh}>数据更新</span>
+                  <span className={styles.metaEn}>Updated</span>
+                  <span className={styles.metaVal}>{updatedAt || '--'}</span>
+                </span>
+                <Space size={8} className={styles.heroActions}>
+                  <Button
+                    type="primary"
+                    icon={fullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+                    onClick={toggleFullscreen}
+                    className={styles.refreshBtn}
+                  >
+                    {fullscreen ? '退出全屏 Exit' : '全屏 Full Screen'}
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<ReloadOutlined />}
+                    loading={loading}
+                    onClick={load}
+                    className={styles.refreshBtn}
+                  >
+                    刷新 Refresh
+                  </Button>
+                </Space>
+              </div>
+            </section>
+
             <section className={`${styles.panel} ${styles.panelRetention}`}>
               <header className={styles.panelHead}>
                 <BiTitle zh="60天未复购客户" en="Inactive Customers 60d" />
@@ -730,7 +733,7 @@ export default function SubDashboard() {
               </div>
             </section>
 
-            <section className={styles.panel}>
+            <section className={`${styles.panel} ${styles.panelOnlineTrend}`}>
               <header className={styles.panelHead}>
                 <BiTitle zh="在线销售趋势" en="Online Sales Trend" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/online-sale')}>
@@ -751,7 +754,7 @@ export default function SubDashboard() {
               </div>
             </section>
 
-            <section className={styles.panel}>
+            <section className={`${styles.panel} ${styles.panelProductMix}`}>
               <header className={styles.panelHead}>
                 <BiTitle zh="销售产品结构" en="Product Mix" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/product-structure')}>
@@ -772,7 +775,7 @@ export default function SubDashboard() {
               </div>
             </section>
 
-            <section className={styles.panel}>
+            <section className={`${styles.panel} ${styles.panelRank}`}>
               <header className={styles.panelHead}>
                 <BiTitle zh="经销商销售排名" en="Dealer Sales Rank" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/sales-rank')}>
