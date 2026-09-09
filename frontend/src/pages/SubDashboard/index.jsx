@@ -41,6 +41,33 @@ const EMPTY_DATA = {
 
 let chinaMapReady = null
 
+/** 把任意形式的省份名（简称/全称）归一化成地图 feature 的精确名称 */
+const PROVINCE_NORMALIZE = (() => {
+  const FULL = [
+    '北京市', '天津市', '上海市', '重庆市',
+    '河北省', '山西省', '辽宁省', '吉林省', '黑龙江省',
+    '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省',
+    '河南省', '湖北省', '湖南省', '广东省', '海南省',
+    '四川省', '贵州省', '云南省', '陕西省', '甘肃省', '青海省', '台湾省',
+    '内蒙古自治区', '广西壮族自治区', '西藏自治区', '宁夏回族自治区', '新疆维吾尔自治区',
+    '香港特别行政区', '澳门特别行政区',
+  ]
+  const map = {}
+  FULL.forEach((full) => {
+    map[full] = full
+    // 去掉省/市/自治区/特别行政区
+    const s1 = full.replace(/省|市|自治区|特别行政区/g, '')
+    map[s1] = full
+    // 去掉民族词
+    const s2 = full.replace(/壮族|回族|维吾尔/g, '')
+    map[s2] = full
+    // 同时去掉
+    const s3 = full.replace(/省|市|自治区|特别行政区|壮族|回族|维吾尔/g, '')
+    map[s3] = full
+  })
+  return (raw) => map[raw] || raw
+})()
+
 function ensureChinaMap() {
   if (chinaMapReady) return chinaMapReady
   const sources = [
@@ -575,83 +602,136 @@ export default function SubDashboard() {
     }
   }, [data.salesRank])
 
-  const offsiteProvinceAgg = useMemo(() => {
-    const map = {}
+  const { offsiteProvinceAgg, provinceProductsMap } = useMemo(() => {
+    const aggMap = {}
+    const prodMap = {}
     ;(data.offsiteSales || []).forEach((r) => {
-      const province = (r.province || '').replace(/省|市|自治区|壮族|回族|维吾尔/g, '') || '未知'
-      map[province] = (map[province] || 0) + Number(r.quantity || 0)
+      const province = PROVINCE_NORMALIZE((r.province || '').trim()) || '未知'
+      const qty = Number(r.quantity || 0)
+      const product = (r.productName || '未命名').trim()
+      aggMap[province] = (aggMap[province] || 0) + qty
+      if (!prodMap[province]) prodMap[province] = {}
+      prodMap[province][product] = (prodMap[province][product] || 0) + qty
     })
-    return Object.entries(map)
+    const agg = Object.entries(aggMap)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
+    // 把 prodMap 的内部结构也转成数组，便于 tooltip 排序
+    const productListMap = {}
+    Object.entries(prodMap).forEach(([prov, obj]) => {
+      productListMap[prov] = Object.entries(obj)
+        .map(([product, qty]) => ({ product, qty }))
+        .sort((a, b) => b.qty - a.qty)
+    })
+    return { offsiteProvinceAgg: agg, provinceProductsMap: productListMap }
   }, [data.offsiteSales])
 
-  const offsiteTopProvinces = useMemo(
-    () => offsiteProvinceAgg.slice(0, 8),
-    [offsiteProvinceAgg],
-  )
+  // 诊断 log（构建完数据后立刻打印）
+  useEffect(() => {
+    if (offsiteProvinceAgg.length > 0) {
+      console.log('[map debug] offsiteProvinceAgg:', offsiteProvinceAgg.slice(0, 5))
+      console.log('[map debug] provinceProductsMap keys:', Object.keys(provinceProductsMap).slice(0, 10))
+    }
+  }, [offsiteProvinceAgg, provinceProductsMap])
 
   const offsiteMapOption = useMemo(
-    () => ({
-      tooltip: {
-        trigger: 'item',
-        formatter: (p) => `${p.name}<br/>异地销量：${Number(p.value || 0).toLocaleString('zh-CN')}`,
-      },
-      visualMap: {
-        min: 0,
-        max: Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0),
-        left: 6,
-        bottom: 8,
-        text: ['高 High', '低 Low'],
-        textStyle: { color: '#7a6f65', fontSize: 11, fontWeight: 500 },
-        inRange: { color: ['#f7e8d3', '#d8a84c', '#a52a2a', '#7a1414'] },
-        calculable: false,
-        itemWidth: 12,
-        itemHeight: 88,
-        itemGap: 2,
-      },
-      series: [
-        {
-          type: 'map',
-          map: 'china',
-          roam: true,
-          zoom: 1.08,
-          scaleLimit: { min: 0.6, max: 4 },
-          layoutCenter: ['52%', '50%'],
-          layoutSize: '96%',
-          aspectScale: 0.82,
-          itemStyle: {
-            areaColor: '#f5eee1',
-            borderColor: '#c7b48f',
-            borderWidth: 0.8,
-            shadowColor: 'rgba(139, 26, 26, 0.08)',
-            shadowBlur: 6,
-            shadowOffsetY: 2,
+    () => {
+      const maxVal = Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0)
+      return {
+        tooltip: {
+          trigger: 'item',
+          appendToBody: true,
+          formatter: (p) => {
+            const province = p.name || ''
+            const total = Number(p.value || 0)
+            const products = provinceProductsMap[province] || []
+            const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+            let html = `<b style="font-size:13px;color:#1f1a17;">${esc(province)}</b><br/>`
+            html += `<span style="color:#8b1a1a;font-weight:700;">异地销量：${total.toLocaleString('zh-CN')}</span>`
+            if (products.length > 0) {
+              html += `<br/><br/><span style="font-size:10.5px;color:#8a7f73;letter-spacing:0.04em;">产品明细</span><br/>`
+              products.slice(0, 6).forEach((item, idx) => {
+                const dot = idx === 0 ? '#c9a227' : idx === 1 ? '#a52a2a' : '#b5a894'
+                html += `<span style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;gap:14px;">
+                  <span style="display:flex;align-items:center;gap:6px;min-width:0;flex:1;">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
+                    <span style="color:#342a23;font-weight:${idx < 2 ? 600 : 500};font-size:12px;">${esc(item.product)}</span>
+                  </span>
+                  <span style="color:#8b1a1a;font-weight:700;font-variant-numeric:tabular-nums;font-size:12px;flex-shrink:0;">${Number(item.qty || 0).toLocaleString('zh-CN')}</span>
+                </span><br/>`
+              })
+              if (products.length > 6) {
+                html += `<span style="color:#a89a88;font-size:11px;">等 ${products.length} 款产品</span>`
+              }
+            } else {
+              html += `<br/><span style="color:#a89a88;font-size:11px;">暂无销售明细</span>`
+            }
+            return html
           },
-          label: {
-            show: true,
-            color: '#574c40',
-            fontSize: 10.5,
-            fontWeight: 500,
-            formatter: (p) => {
-              // 南海诸岛等小区域不标，避免挤成一团
-              if (!p.name || p.name.includes('南海') || p.name.includes('九段')) return ''
-              return p.name
-            },
-          },
-          emphasis: {
-            label: { show: true, color: '#1f1a17', fontWeight: 700, fontSize: 12 },
-            itemStyle: { areaColor: '#e9b949', borderColor: '#b8860b', borderWidth: 1.2, shadowBlur: 12, shadowColor: 'rgba(184, 134, 11, 0.4)' },
-          },
-          select: {
-            label: { color: '#1f1a17', fontWeight: 700 },
-            itemStyle: { areaColor: '#e9b949' },
-          },
-          data: offsiteProvinceAgg,
         },
-      ],
-    }),
-    [offsiteProvinceAgg],
+        visualMap: {
+          min: 0,
+          max: maxVal,
+          left: 14,
+          bottom: 18,
+          text: ['高 High', '低 Low'],
+          textStyle: { color: '#7a6f65', fontSize: 11.5, fontWeight: 500 },
+          inRange: { color: ['#f5e8d3', '#e6c066', '#a52a2a', '#5f1010'] },
+          calculable: false,
+          itemWidth: 14,
+          itemHeight: 100,
+          itemGap: 4,
+          orient: 'vertical',
+        },
+        series: [
+          {
+            type: 'map',
+            map: 'china',
+            roam: true,
+            zoom: 1,
+          scaleLimit: { min: 0.6, max: 4 },
+          layoutCenter: ['50%', '52%'],
+          layoutSize: '100%',
+          aspectScale: 0.82,
+            selectedMode: false,
+            itemStyle: {
+              areaColor: '#f5eee1',
+              borderColor: '#c7b48f',
+              borderWidth: 0.8,
+              shadowColor: 'rgba(139, 26, 26, 0.06)',
+              shadowBlur: 5,
+              shadowOffsetY: 2,
+            },
+            label: {
+              show: true,
+              color: '#574c40',
+              fontSize: 10.5,
+              fontWeight: 500,
+              formatter: (p) => {
+                if (!p.name || p.name.includes('南海') || p.name.includes('九段')) return ''
+                return p.name
+              },
+            },
+            emphasis: {
+              label: { show: true, color: '#1f1a17', fontWeight: 700, fontSize: 12 },
+              itemStyle: {
+                areaColor: '#e9b949',
+                borderColor: '#b8860b',
+                borderWidth: 1.2,
+                shadowBlur: 12,
+                shadowColor: 'rgba(184, 134, 11, 0.4)',
+              },
+            },
+            select: {
+              label: { color: '#1f1a17', fontWeight: 700 },
+              itemStyle: { areaColor: '#e9b949' },
+            },
+            data: offsiteProvinceAgg,
+          },
+        ],
+      }
+    },
+    [offsiteProvinceAgg, provinceProductsMap],
   )
 
   const retentionColumns = [
@@ -768,7 +848,6 @@ export default function SubDashboard() {
   ]
 
   const chartFill = { height: '100%', width: '100%', minHeight: 0 }
-  const offsiteMax = offsiteTopProvinces[0]?.value || 1
   const retentionRows = [...(data.retentionAlerts || [])]
     .sort((a, b) => (Number(a.daysSincePurchase) || 0) - (Number(b.daysSincePurchase) || 0))
     .slice(0, 6)
@@ -902,42 +981,13 @@ export default function SubDashboard() {
               </header>
               <div className={styles.panelBody}>
                 {mapReady && offsiteProvinceAgg.length ? (
-                  <div className={styles.mapBody}>
-                    <div className={styles.mapChart}>
-                      <ReactECharts
-                        key={`offsite-${chartKey}`}
-                        option={offsiteMapOption}
-                        style={chartFill}
-                        opts={{ renderer: 'canvas' }}
-                      />
-                    </div>
-                    <aside className={styles.mapRank}>
-                      <div className={styles.mapRankTitle}>
-                        <span className={styles.biZh}>省份销量 TOP</span>
-                        <span className={styles.biEn}>Province TOP</span>
-                      </div>
-                      <ul className={styles.mapRankList}>
-                        {offsiteTopProvinces.map((item, idx) => (
-                          <li key={item.name} className={styles.mapRankItem}>
-                            <span
-                              className={`${styles.mapRankNo} ${idx < 3 ? styles.mapRankTop : ''} ${
-                                idx === 0 ? styles.rankGold : ''
-                              }`}
-                            >
-                              {idx + 1}
-                            </span>
-                            <span className={styles.mapRankName}>{item.name}</span>
-                            <span className={styles.mapRankBarWrap}>
-                              <span
-                                className={`${styles.mapRankBar} ${idx === 0 ? styles.barGold : ''}`}
-                                style={{ width: `${Math.max(8, (item.value / offsiteMax) * 100)}%` }}
-                              />
-                            </span>
-                            <span className={styles.mapRankVal}>{MONEY(item.value)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </aside>
+                  <div className={styles.mapChart}>
+                    <ReactECharts
+                      key={`offsite-${chartKey}`}
+                      option={offsiteMapOption}
+                      style={chartFill}
+                      opts={{ renderer: 'canvas' }}
+                    />
                   </div>
                 ) : (
                   <Empty
