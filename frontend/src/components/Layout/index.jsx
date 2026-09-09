@@ -56,9 +56,15 @@ export default function MainLayout() {
       <Layout className={styles.main}>
         <Header />
         <TagsView />
-        <BreadcrumbNav />
+        {location.pathname !== '/sub-dashboard' && <BreadcrumbNav />}
         <Content className={styles.content}>
-          <div className={location.pathname === '/dashboard' ? styles.panelFlush : styles.panel}>
+          <div
+            className={
+              location.pathname === '/dashboard' || location.pathname === '/sub-dashboard'
+                ? styles.panelFlush
+                : styles.panel
+            }
+          >
             <Outlet />
           </div>
         </Content>

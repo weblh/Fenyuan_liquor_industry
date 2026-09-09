@@ -18,6 +18,7 @@ import ReactECharts from 'echarts-for-react'
 import * as echarts from 'echarts'
 import { useSelector } from 'react-redux'
 import { getDashboardOverview } from '@/api'
+import { customerMaintainApi } from '@/api/modules/business'
 import styles from './index.module.css'
 
 const MONEY = (v) => {
@@ -95,18 +96,60 @@ export default function SubDashboard() {
   const [mapReady, setMapReady] = useState(false)
   const pageRef = useRef(null)
 
+  /** 把一个分页资源的所有页全部拉完，返回合并后的 records 数组
+   *  分批并行（每批 8 页）避免一次性打爆后端 */
+  const fetchAllPages = useCallback(async (api, pageSize = 10, batchSize = 8) => {
+    const first = await api.list({ current: 1, pageSize })
+    const firstRecords = Array.isArray(first) ? first : first?.records || first?.list || []
+    const total = Number(first?.total ?? firstRecords.length)
+    const pages = Number(first?.pages ?? Math.max(1, Math.ceil(total / pageSize)))
+
+    if (pages <= 1) return firstRecords
+
+    // 分批拉取剩余页（第 2 页 ~ 第 pages 页）
+    const rest = []
+    for (let from = 2; from <= pages; from += batchSize) {
+      const chunk = Array.from({ length: Math.min(batchSize, pages - from + 1) }, (_, i) =>
+        api.list({ current: from + i, pageSize }).then((res) =>
+          Array.isArray(res) ? res : res?.records || res?.list || []
+        )
+      )
+      const results = await Promise.all(chunk)
+      rest.push(...results)
+    }
+    return [...firstRecords, ...rest.flat()]
+  }, [])
+
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getDashboardOverview()
-      setData(res || EMPTY_DATA)
+      // 并行获取大屏概览 + 客户维护全部分页
+      const [overview, allCustomers] = await Promise.all([
+        getDashboardOverview().catch(() => null),
+        fetchAllPages(customerMaintainApi, 50).catch(() => null),
+      ])
+
+      const merged = overview || EMPTY_DATA
+
+      // 从全量客户里筛选出 60 天未复购的预警客户（后端可能返回的是全部客户，不限于预警）
+      if (allCustomers && allCustomers.length > 0) {
+        const alertOnly = allCustomers.filter(
+          (c) => Number(c.daysSincePurchase) >= 60
+        )
+        merged.retentionAlerts = alertOnly
+        if (merged.summary) {
+          merged.summary = { ...merged.summary, retentionAlertCount: alertOnly.length }
+        }
+      }
+
+      setData(merged)
       setUpdatedAt(formatNow())
     } catch {
       setData(EMPTY_DATA)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [fetchAllPages])
 
   useEffect(() => {
     load()
@@ -264,47 +307,107 @@ export default function SubDashboard() {
     }
     return {
       color: ['#8b1a1a', '#c9a227'],
-      tooltip: { trigger: 'axis', textStyle: { fontSize: 13 } },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(255, 252, 246, 0.97)',
+        borderColor: 'rgba(201, 162, 39, 0.55)',
+        borderWidth: 1,
+        padding: [9, 13],
+        textStyle: { fontSize: 12, color: '#342a23' },
+        extraCssText: 'box-shadow: 0 6px 18px rgba(139,26,26,0.14); border-radius: 10px;',
+        axisPointer: {
+          type: 'shadow',
+          shadowStyle: { color: 'rgba(139, 26, 26, 0.05)' },
+        },
+      },
       legend: {
         data: channels.map((c) => `${c}销售额`),
-        top: 0,
-        right: 0,
-        itemWidth: 14,
-        itemHeight: 10,
-        textStyle: { color: '#595959', fontSize: 13 },
+        top: 2,
+        right: 4,
+        itemWidth: 13,
+        itemHeight: 9,
+        itemGap: 18,
+        icon: 'roundRect',
+        textStyle: { color: '#6b625a', fontSize: 11.5, fontWeight: 500 },
       },
-      grid: { left: 52, right: 14, top: 34, bottom: 26 },
+      grid: { left: 48, right: 16, top: 40, bottom: 28 },
       xAxis: {
         type: 'category',
         data: periods.map(monthLabel),
-        axisLine: { lineStyle: { color: '#d9d9d9' } },
-        axisLabel: { color: '#8c8c8c', fontSize: 13 },
+        axisLine: { lineStyle: { color: '#e0d5c2' } },
+        axisTick: { show: false },
+        axisLabel: { color: '#8a7f73', fontSize: 12, fontWeight: 500, margin: 11 },
       },
       yAxis: {
         type: 'value',
         axisLabel: {
-          color: '#8c8c8c',
-          fontSize: 13,
+          color: '#a89a88',
+          fontSize: 11,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(139, 26, 26, 0.07)' } },
       },
-      series: channels.map((channel, idx) => ({
-        name: `${channel}销售额`,
-        type: 'bar',
-        barMaxWidth: 18,
-        barGap: '20%',
-        data: periods.map((p) => byKey[`${channel}|${p}`] || 0),
-        itemStyle: { borderRadius: [3, 3, 0, 0] },
-        label: {
-          show: true,
-          position: 'top',
-          color: idx === 0 ? '#8b1a1a' : '#8a7020',
-          fontSize: 11,
-          fontWeight: 600,
-          formatter: (p) => (p.value ? MONEY(p.value) : ''),
-        },
-      })),
+      series: channels.map((channel, idx) => {
+        const isWine = idx === 0
+        return {
+          name: `${channel}销售额`,
+          type: 'bar',
+          barMaxWidth: 20,
+          barGap: '25%',
+          data: periods.map((p) => byKey[`${channel}|${p}`] || 0),
+          itemStyle: {
+            borderRadius: [5, 5, 0, 0],
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: isWine
+                ? [
+                    { offset: 0, color: '#b43a3a' },
+                    { offset: 1, color: '#7a1414' },
+                  ]
+                : [
+                    { offset: 0, color: '#ecc85a' },
+                    { offset: 1, color: '#c19120' },
+                  ],
+            },
+            shadowColor: isWine ? 'rgba(122, 20, 20, 0.28)' : 'rgba(201, 162, 39, 0.32)',
+            shadowBlur: 6,
+            shadowOffsetY: 3,
+          },
+          emphasis: {
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: isWine
+                  ? [
+                      { offset: 0, color: '#cc4d4d' },
+                      { offset: 1, color: '#8b1a1a' },
+                    ]
+                  : [
+                      { offset: 0, color: '#f6d878' },
+                      { offset: 1, color: '#d8b13a' },
+                    ],
+              },
+            },
+          },
+          label: {
+            show: true,
+            position: 'top',
+            distance: 5,
+            color: isWine ? '#8b1a1a' : '#9a7b1a',
+            fontSize: 11,
+            fontWeight: 700,
+            formatter: (p) => (p.value ? MONEY(p.value) : ''),
+          },
+        }
+      }),
     }
   }, [data.onlineSaleTrend])
 
@@ -326,19 +429,28 @@ export default function SubDashboard() {
       },
       legend: {
         orient: 'vertical',
-        right: 4,
+        right: 8,
         top: 'middle',
-        itemWidth: 12,
-        itemHeight: 10,
-        textStyle: { color: '#595959', fontSize: 12 },
+        icon: 'circle',
+        itemWidth: 11,
+        itemHeight: 11,
+        itemGap: 16,
+        textStyle: { color: '#5a5048', fontSize: 13, fontWeight: 500 },
       },
       series: [
         {
           type: 'pie',
-          radius: ['38%', '64%'],
-          center: ['36%', '52%'],
+          radius: ['46%', '74%'],
+          center: ['34%', '50%'],
           avoidLabelOverlap: true,
-          itemStyle: { borderRadius: 3, borderColor: '#fff', borderWidth: 1 },
+          itemStyle: {
+            borderRadius: 5,
+            borderColor: '#fff',
+            borderWidth: 2.5,
+            shadowColor: 'rgba(31, 26, 23, 0.12)',
+            shadowBlur: 8,
+            shadowOffsetY: 2,
+          },
           label: { show: false },
           data: chartData,
         },
@@ -348,46 +460,115 @@ export default function SubDashboard() {
 
   const rankOption = useMemo(() => {
     const list = [...(data.salesRank || [])].slice(0, 8).reverse()
+    const n = list.length
+    const barColor = (rankFromTop) => {
+      // 横向渐变（左→右）
+      if (rankFromTop === 1) {
+        return {
+          type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+          colorStops: [
+            { offset: 0, color: '#ecc85a' },
+            { offset: 1, color: '#c19120' },
+          ],
+        }
+      }
+      if (rankFromTop <= 3) {
+        return {
+          type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+          colorStops: [
+            { offset: 0, color: '#c04a4a' },
+            { offset: 1, color: '#8b1a1a' },
+          ],
+        }
+      }
+      return {
+        type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+        colorStops: [
+          { offset: 0, color: '#b06a6a' },
+          { offset: 1, color: '#9a3a3a' },
+        ],
+      }
+    }
     return {
-      color: ['#8b1a1a'],
       tooltip: {
         trigger: 'axis',
-        axisPointer: { type: 'shadow' },
+        axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(139, 26, 26, 0.05)' } },
+        backgroundColor: 'rgba(255, 252, 246, 0.97)',
+        borderColor: 'rgba(201, 162, 39, 0.55)',
+        borderWidth: 1,
+        padding: [9, 13],
+        textStyle: { fontSize: 12, color: '#342a23' },
+        extraCssText: 'box-shadow: 0 6px 18px rgba(139,26,26,0.14); border-radius: 10px;',
         formatter: (params) => {
           const p = params?.[0]
           if (!p) return ''
-          return `${p.name}<br/>销售额：${MONEY(p.value)}`
+          return `${p.name}<br/>销售额：<b>${MONEY(p.value)}</b>`
         },
       },
-      grid: { left: 96, right: 56, top: 8, bottom: 8 },
+      grid: { left: 92, right: 58, top: 10, bottom: 10 },
       xAxis: {
         type: 'value',
         axisLabel: {
-          color: '#8c8c8c',
-          fontSize: 12,
+          color: '#a89a88',
+          fontSize: 11,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(139, 26, 26, 0.07)' } },
       },
       yAxis: {
         type: 'category',
         data: list.map((i) => i.companyName),
-        axisLabel: { color: '#595959', width: 84, overflow: 'truncate', fontSize: 13 },
+        axisLabel: {
+          color: '#4a4038',
+          width: 82,
+          overflow: 'truncate',
+          fontSize: 12.5,
+          fontWeight: 600,
+          margin: 12,
+        },
         axisLine: { show: false },
         axisTick: { show: false },
       },
       series: [
         {
           type: 'bar',
-          barMaxWidth: 16,
-          data: list.map((i) => Number(i.amount || 0)),
-          itemStyle: { borderRadius: [0, 5, 5, 0] },
+          barMaxWidth: 15,
+          barCategoryGap: '42%',
+          showBackground: true,
+          backgroundStyle: {
+            color: 'rgba(139, 26, 26, 0.06)',
+            borderRadius: [0, 999, 999, 0],
+          },
+          data: list.map((i, idx) => {
+            const rankFromTop = n - idx
+            const gold = rankFromTop === 1
+            return {
+              value: Number(i.amount || 0),
+              itemStyle: {
+                borderRadius: [0, 999, 999, 0],
+                color: barColor(rankFromTop),
+                shadowColor: gold ? 'rgba(201, 162, 39, 0.35)' : 'rgba(122, 20, 20, 0.25)',
+                shadowBlur: 6,
+                shadowOffsetX: 2,
+              },
+            }
+          }),
           label: {
             show: true,
             position: 'right',
-            color: '#8c8c8c',
+            distance: 8,
+            color: '#8b1a1a',
             fontSize: 12,
+            fontWeight: 700,
+            fontFamily: 'inherit',
             formatter: (p) => MONEY(p.value),
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+            },
           },
         },
       ],
@@ -419,34 +600,39 @@ export default function SubDashboard() {
       visualMap: {
         min: 0,
         max: Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0),
-        left: 2,
-        bottom: 4,
+        left: 6,
+        bottom: 8,
         text: ['高 High', '低 Low'],
-        textStyle: { color: '#6b625a', fontSize: 12 },
-        inRange: { color: ['#f7e8d3', '#d4a84b', '#8b1a1a'] },
+        textStyle: { color: '#7a6f65', fontSize: 11, fontWeight: 500 },
+        inRange: { color: ['#f7e8d3', '#d8a84c', '#a52a2a', '#7a1414'] },
         calculable: false,
-        itemWidth: 10,
-        itemHeight: 72,
+        itemWidth: 12,
+        itemHeight: 88,
+        itemGap: 2,
       },
       series: [
         {
           type: 'map',
           map: 'china',
           roam: true,
-          zoom: 1.05,
+          zoom: 1.08,
           scaleLimit: { min: 0.6, max: 4 },
-          layoutCenter: ['54%', '50%'],
-          layoutSize: '92%',
+          layoutCenter: ['52%', '50%'],
+          layoutSize: '96%',
           aspectScale: 0.82,
           itemStyle: {
-            areaColor: '#f3ece0',
-            borderColor: '#d9cbb6',
-            borderWidth: 0.7,
+            areaColor: '#f5eee1',
+            borderColor: '#c7b48f',
+            borderWidth: 0.8,
+            shadowColor: 'rgba(139, 26, 26, 0.08)',
+            shadowBlur: 6,
+            shadowOffsetY: 2,
           },
           label: {
             show: true,
-            color: '#4a433c',
-            fontSize: 11,
+            color: '#574c40',
+            fontSize: 10.5,
+            fontWeight: 500,
             formatter: (p) => {
               // 南海诸岛等小区域不标，避免挤成一团
               if (!p.name || p.name.includes('南海') || p.name.includes('九段')) return ''
@@ -454,8 +640,12 @@ export default function SubDashboard() {
             },
           },
           emphasis: {
-            label: { show: true, color: '#1f1a17', fontWeight: 600, fontSize: 13 },
-            itemStyle: { areaColor: '#e8c56a' },
+            label: { show: true, color: '#1f1a17', fontWeight: 700, fontSize: 12 },
+            itemStyle: { areaColor: '#e9b949', borderColor: '#b8860b', borderWidth: 1.2, shadowBlur: 12, shadowColor: 'rgba(184, 134, 11, 0.4)' },
+          },
+          select: {
+            label: { color: '#1f1a17', fontWeight: 700 },
+            itemStyle: { areaColor: '#e9b949' },
           },
           data: offsiteProvinceAgg,
         },
@@ -481,9 +671,18 @@ export default function SubDashboard() {
         </span>
       ),
       dataIndex: 'daysSincePurchase',
-      width: 88,
+      width: 92,
       align: 'right',
-      render: (v) => <span className={styles.daysBadge}>{v || 0}天</span>,
+      render: (v) => {
+        const d = Number(v) || 0
+        const tier = d >= 235 ? 'badgeHot' : d >= 180 ? 'badgeHigh' : d >= 120 ? 'badgeWarn' : 'badgeMild'
+        return (
+          <span className={`${styles.daysBadge} ${styles[tier]}`}>
+            <i className={styles.badgeDot} />
+            {d}<em>天</em>
+          </span>
+        )
+      },
     },
     {
       title: (
@@ -493,7 +692,7 @@ export default function SubDashboard() {
       ),
       dataIndex: 'lastPurchaseDate',
       width: 110,
-      render: (v) => v || '-',
+      render: (v) => <span className={styles.dateCell}>{v || '-'}</span>,
     },
   ]
 
@@ -570,7 +769,9 @@ export default function SubDashboard() {
 
   const chartFill = { height: '100%', width: '100%', minHeight: 0 }
   const offsiteMax = offsiteTopProvinces[0]?.value || 1
-  const retentionRows = (data.retentionAlerts || []).slice(0, 8)
+  const retentionRows = [...(data.retentionAlerts || [])]
+    .sort((a, b) => (Number(a.daysSincePurchase) || 0) - (Number(b.daysSincePurchase) || 0))
+    .slice(0, 6)
   const inventoryRows = (data.inventory || []).slice(0, 8)
   const customerRows = (data.customerDev || []).slice(0, 6)
 
@@ -580,8 +781,19 @@ export default function SubDashboard() {
 
       <Spin spinning={loading} className={styles.boardSpin} wrapperClassName={styles.boardSpinWrap}>
         <div className={styles.board}>
-          <div className={styles.kpiGrid}>
-            {kpiCards.map((card) => (
+          <div className={styles.mainGrid}>
+            <div className={styles.kpiGrid}>
+            {kpiCards
+              .filter(
+                (card) =>
+                  card.key !== 'retention' &&
+                  card.key !== 'sale' &&
+                  card.key !== 'offsite' &&
+                  card.key !== 'inventory' &&
+                  card.key !== 'dealer' &&
+                  card.key !== 'customer'
+              )
+              .map((card) => (
               <Tooltip key={card.key} title={card.tip}>
                 <button
                   type="button"
@@ -607,9 +819,8 @@ export default function SubDashboard() {
                 </button>
               </Tooltip>
             ))}
-          </div>
+            </div>
 
-          <div className={styles.mainGrid}>
             <section className={`${styles.panel} ${styles.panelHero}`}>
               <div className={styles.heroText}>
                 <BiTitle
@@ -623,7 +834,7 @@ export default function SubDashboard() {
                   <span className={styles.heroEn}>Fenyuan Liquor Operations Board</span>
                 </h1>
                 <p>
-                  你好，{name}。客户维护 · 比价 · 异地销售一屏总览
+                  <span className={styles.heroZh}>你好，{name}。客户维护 · 比价 · 异地销售一屏总览</span>
                   <span className={styles.heroSubEn}>Customer · Pricing · Offsite Sales at a Glance</span>
                 </p>
               </div>
@@ -663,7 +874,7 @@ export default function SubDashboard() {
                   className={styles.linkBtn}
                   onClick={() => navigate('/business/customer-maintain')}
                 >
-                  明细 Detail
+                  共计{summary.retentionAlertCount || 0}家 · 详情查看 →
                 </button>
               </header>
               <div className={styles.panelBody}>
@@ -686,7 +897,7 @@ export default function SubDashboard() {
                   className={styles.linkBtn}
                   onClick={() => navigate('/business/offsite-sales')}
                 >
-                  明细 Detail
+                  共计{MONEY(summary.totalOffsiteQty)} · 详情查看 →
                 </button>
               </header>
               <div className={styles.panelBody}>
@@ -708,13 +919,17 @@ export default function SubDashboard() {
                       <ul className={styles.mapRankList}>
                         {offsiteTopProvinces.map((item, idx) => (
                           <li key={item.name} className={styles.mapRankItem}>
-                            <span className={`${styles.mapRankNo} ${idx < 3 ? styles.mapRankTop : ''}`}>
+                            <span
+                              className={`${styles.mapRankNo} ${idx < 3 ? styles.mapRankTop : ''} ${
+                                idx === 0 ? styles.rankGold : ''
+                              }`}
+                            >
                               {idx + 1}
                             </span>
                             <span className={styles.mapRankName}>{item.name}</span>
                             <span className={styles.mapRankBarWrap}>
                               <span
-                                className={styles.mapRankBar}
+                                className={`${styles.mapRankBar} ${idx === 0 ? styles.barGold : ''}`}
                                 style={{ width: `${Math.max(8, (item.value / offsiteMax) * 100)}%` }}
                               />
                             </span>
@@ -737,7 +952,7 @@ export default function SubDashboard() {
               <header className={styles.panelHead}>
                 <BiTitle zh="在线销售趋势" en="Online Sales Trend" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/online-sale')}>
-                  明细 Detail
+                  共计{MONEY(summary.totalSaleAmount)} · 详情查看 →
                 </button>
               </header>
               <div className={styles.panelBody}>
@@ -779,7 +994,7 @@ export default function SubDashboard() {
               <header className={styles.panelHead}>
                 <BiTitle zh="经销商销售排名" en="Dealer Sales Rank" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/sales-rank')}>
-                  明细 Detail
+                  共计{summary.dealerCount || 0}家 · 详情查看 →
                 </button>
               </header>
               <div className={styles.panelBody}>
@@ -801,7 +1016,11 @@ export default function SubDashboard() {
                 <header className={styles.panelHead}>
                   <BiTitle zh="库存概况" en="Inventory" />
                   <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/inventory')}>
-                    明细 Detail
+                    共计
+                    {Number(summary.totalInventoryAmount) > 0
+                      ? MONEY(summary.totalInventoryAmount)
+                      : MONEY(summary.totalInventoryQty)}{' '}
+                    · 详情查看 →
                   </button>
                 </header>
                 <div className={styles.panelBody}>
@@ -819,7 +1038,7 @@ export default function SubDashboard() {
                 <header className={styles.panelHead}>
                   <BiTitle zh="客户开发" en="Customer Dev" />
                   <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/customer-dev')}>
-                    明细 Detail
+                    共计{MONEY(summary.totalCustomerDevAmount)} · 详情查看 →
                   </button>
                 </header>
                 <div className={styles.panelBody}>
