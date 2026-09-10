@@ -333,18 +333,42 @@ export default function SubDashboard() {
       return m ? `${Number(m[1])}月` : p
     }
     return {
-      color: ['#8b1a1a', '#c9a227'],
+      color: ['#2f80ed', '#28c7e6'],
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(255, 252, 246, 0.97)',
-        borderColor: 'rgba(201, 162, 39, 0.55)',
-        borderWidth: 1,
-        padding: [9, 13],
-        textStyle: { fontSize: 12, color: '#342a23' },
-        extraCssText: 'box-shadow: 0 6px 18px rgba(139,26,26,0.14); border-radius: 10px;',
-        axisPointer: {
-          type: 'shadow',
-          shadowStyle: { color: 'rgba(139, 26, 26, 0.05)' },
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        borderWidth: 0,
+        padding: 0,
+        textStyle: {
+          fontSize: 12,
+          color: '#ffffff',
+          textShadowColor: 'rgba(0, 0, 0, 0.85)',
+          textShadowBlur: 4,
+        },
+        extraCssText: 'background: transparent !important; border: none !important; box-shadow: none !important;',
+        position: (point) => [point[0] + 14, point[1] - 10],
+        axisPointer: { type: 'none' },
+        formatter: (params) => {
+          if (!Array.isArray(params) || !params.length) return ''
+          const idx = params[0].dataIndex
+          const lines = params.map((p) => {
+            const channel = String(p.seriesName || '').replace('销售额', '')
+            if (idx <= 0) {
+              return `${channel}：暂无上月数据`
+            }
+            const prev = Number(byKey[`${channel}|${periods[idx - 1]}`] || 0)
+            if (prev <= 0) {
+              return `${channel}：上月无数据`
+            }
+            const cur = Number(p.value || 0)
+            const rate = ((cur - prev) / prev) * 100
+            const up = rate >= 0
+            const color = up ? '#56d8ee' : '#ff7a7a'
+            const word = up ? '增长' : '减少'
+            return `${channel}：相比于上月${word} <b style="color:${color};text-shadow:0 0 3px rgba(0,0,0,.9)">${Math.abs(rate).toFixed(1)}%</b>`
+          })
+          return lines.join('<br/>')
         },
       },
       legend: {
@@ -355,80 +379,73 @@ export default function SubDashboard() {
         itemHeight: 9,
         itemGap: 18,
         icon: 'roundRect',
-        textStyle: { color: '#6b625a', fontSize: 11.5, fontWeight: 500 },
+        textStyle: { color: '#9db2d0', fontSize: 11.5, fontWeight: 500 },
       },
       grid: { left: 48, right: 16, top: 40, bottom: 28 },
       xAxis: {
         type: 'category',
         data: periods.map(monthLabel),
-        axisLine: { lineStyle: { color: '#e0d5c2' } },
+        axisLine: { lineStyle: { color: '#2a3f63' } },
         axisTick: { show: false },
-        axisLabel: { color: '#8a7f73', fontSize: 12, fontWeight: 500, margin: 11 },
+        axisLabel: { color: '#8fa3c4', fontSize: 12, fontWeight: 500, margin: 11 },
       },
       yAxis: {
         type: 'value',
         axisLabel: {
-          color: '#a89a88',
+          color: '#7d92b5',
           fontSize: 11,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(139, 26, 26, 0.07)' } },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(120, 160, 220, 0.12)' } },
       },
       series: channels.map((channel, idx) => {
         const isWine = idx === 0
+        const lineColor = isWine ? '#5aa5ff' : '#56d8ee'
         return {
           name: `${channel}销售额`,
-          type: 'bar',
-          barMaxWidth: 20,
-          barGap: '25%',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 7,
+          showSymbol: true,
           data: periods.map((p) => byKey[`${channel}|${p}`] || 0),
+          lineStyle: {
+            width: 3,
+            color: lineColor,
+            shadowColor: isWine ? 'rgba(47, 128, 237, 0.5)' : 'rgba(34, 211, 238, 0.5)',
+            shadowBlur: 8,
+          },
           itemStyle: {
-            borderRadius: [5, 5, 0, 0],
+            color: lineColor,
+            borderColor: '#0b1729',
+            borderWidth: 2,
+          },
+          areaStyle: {
             color: {
               type: 'linear',
               x: 0,
               y: 0,
               x2: 0,
               y2: 1,
-              colorStops: isWine
-                ? [
-                    { offset: 0, color: '#b43a3a' },
-                    { offset: 1, color: '#7a1414' },
-                  ]
-                : [
-                    { offset: 0, color: '#ecc85a' },
-                    { offset: 1, color: '#c19120' },
-                  ],
+              colorStops: [
+                { offset: 0, color: isWine ? 'rgba(90, 165, 255, 0.35)' : 'rgba(86, 216, 238, 0.32)' },
+                { offset: 1, color: 'rgba(13, 26, 48, 0)' },
+              ],
             },
-            shadowColor: isWine ? 'rgba(122, 20, 20, 0.28)' : 'rgba(201, 162, 39, 0.32)',
-            shadowBlur: 6,
-            shadowOffsetY: 3,
           },
           emphasis: {
+            focus: 'series',
             itemStyle: {
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
-                colorStops: isWine
-                  ? [
-                      { offset: 0, color: '#cc4d4d' },
-                      { offset: 1, color: '#8b1a1a' },
-                    ]
-                  : [
-                      { offset: 0, color: '#f6d878' },
-                      { offset: 1, color: '#d8b13a' },
-                    ],
-              },
+              borderWidth: 3,
+              shadowBlur: 12,
+              shadowColor: lineColor,
             },
           },
           label: {
             show: true,
             position: 'top',
-            distance: 5,
-            color: isWine ? '#8b1a1a' : '#9a7b1a',
+            distance: 6,
+            color: lineColor,
             fontSize: 11,
             fontWeight: 700,
             formatter: (p) => (p.value ? MONEY(p.value) : ''),
@@ -447,46 +464,126 @@ export default function SubDashboard() {
       seriesMap[label] = (seriesMap[label] || 0) + Number(i.quantity || i.ratio || 0)
     })
     const chartData = Object.entries(seriesMap).map(([name, value]) => ({ name, value }))
+    const totalQty = chartData.reduce((s, i) => s + Number(i.value || 0), 0)
+    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    // 每款酒：内亮外深的径向渐变，环面立体饱满
+    const palette = [
+      ['#5aa5ff', '#1e5fb8'],
+      ['#56d8ee', '#1497c4'],
+      ['#4fe0cc', '#1a9c8c'],
+      ['#8fa8ff', '#4a5fd0'],
+      ['#6fb7ff', '#2f7fd9'],
+      ['#3dd6f2', '#0f8fb8'],
+    ]
+    const gradientData = chartData.map((d, i) => {
+      const [light, dark] = palette[i % palette.length]
+      return {
+        ...d,
+        itemStyle: {
+          color: new echarts.graphic.RadialGradient(0.5, 0.5, 0.8, [
+            { offset: 0, color: light },
+            { offset: 1, color: dark },
+          ]),
+        },
+      }
+    })
     return {
-      color: ['#8b1a1a', '#c9a227', '#6b8f71', '#4a6fa5', '#a0522d', '#7a5c4e'],
       tooltip: {
         trigger: 'item',
-        textStyle: { fontSize: 13 },
-        formatter: (p) => `${p.name}<br/>销量 Qty：${p.value} 箱<br/>占比 Share：${p.percent}%`,
+        appendToBody: true,
+        backgroundColor: 'rgba(13, 26, 48, 0.97)',
+        borderColor: 'rgba(90, 165, 255, 0.35)',
+        borderWidth: 1,
+        padding: [10, 14],
+        textStyle: { fontSize: 12.5, color: '#d5e2f5' },
+        extraCssText: 'box-shadow: none; border-radius: 10px;',
+        formatter: (p) => {
+          try {
+            const qty = Number(p.value || 0)
+            let html = `<div style="font-weight:700;font-size:13px;color:#eaf2ff;margin-bottom:4px;white-space:nowrap;">${esc(p.name)}</div>`
+            html += `<div style="color:#7cb8ff;font-weight:700;line-height:19px;">销量：${qty.toLocaleString('zh-CN')} 箱</div>`
+            html += `<div style="color:#56d8ee;font-weight:700;line-height:19px;">占比：${p.percent}%</div>`
+            return html
+          } catch (e) {
+            return `${p.name}<br/>占比：${p.percent}%<br/>销量：${p.value} 箱`
+          }
+        },
       },
-      legend: {
-        orient: 'vertical',
-        right: 8,
-        top: 'middle',
-        icon: 'circle',
-        itemWidth: 11,
-        itemHeight: 11,
-        itemGap: 16,
-        textStyle: { color: '#5a5048', fontSize: 13, fontWeight: 500 },
+      legend: { show: false },
+      title: {
+        text: `{v|${totalQty.toLocaleString('zh-CN')}}\n{u|总销量（箱）TOTAL}`,
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          rich: {
+            v: { fontSize: 26, fontWeight: 800, color: '#7cb8ff', lineHeight: 32, fontVariantNumeric: 'tabular-nums' },
+            u: { fontSize: 10, fontWeight: 600, color: '#7d92b5', letterSpacing: 1.5, lineHeight: 16 },
+          },
+        },
       },
       series: [
         {
           type: 'pie',
-          radius: ['46%', '74%'],
-          center: ['34%', '50%'],
+          radius: ['52%', '79%'],
+          center: ['50%', '50%'],
           avoidLabelOverlap: true,
           itemStyle: {
-            borderRadius: 5,
-            borderColor: '#fff',
-            borderWidth: 2.5,
-            shadowColor: 'rgba(31, 26, 23, 0.12)',
-            shadowBlur: 8,
-            shadowOffsetY: 2,
+            borderRadius: 0,
+            borderWidth: 2,
+            borderColor: 'rgba(10, 24, 46, 0.9)',
+            shadowColor: 'rgba(0, 0, 0, 0.4)',
+            shadowBlur: 12,
+            shadowOffsetY: 4,
           },
-          label: { show: false },
-          data: chartData,
+          label: {
+            show: true,
+            position: 'outside',
+            color: '#eaf2ff',
+            fontSize: 11,
+            fontWeight: 500,
+            lineHeight: 1.4,
+            formatter: (p) => String(p.name || '').replace(/^.*?\s*·\s*/, ''),
+          },
+          labelLine: {
+            show: true,
+            length: 8,
+            length2: 10,
+            smooth: true,
+            lineStyle: {
+              color: 'rgba(140, 195, 255, 0.5)',
+              width: 1,
+            },
+          },
+          labelLayout: {
+            hideOverlap: true,
+          },
+          emphasis: {
+            scale: true,
+            scaleSize: 6,
+            label: {
+              show: true,
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#ffffff',
+              textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+            },
+            itemStyle: {
+              borderColor: 'rgba(140, 195, 255, 0.9)',
+              borderWidth: 2,
+              shadowBlur: 22,
+              shadowColor: 'rgba(47, 128, 237, 0.5)',
+            },
+          },
+          data: gradientData,
         },
       ],
     }
   }, [data.productStructure])
 
   const rankOption = useMemo(() => {
-    const list = [...(data.salesRank || [])].slice(0, 8).reverse()
+    const full = [...(data.salesRank || [])]
+    const totalAmount = full.reduce((s, i) => s + Number(i.amount || 0), 0)
+    const list = full.slice(0, 8).reverse()
     const n = list.length
     const barColor = (rankFromTop) => {
       // 横向渐变（左→右）
@@ -494,8 +591,8 @@ export default function SubDashboard() {
         return {
           type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
           colorStops: [
-            { offset: 0, color: '#ecc85a' },
-            { offset: 1, color: '#c19120' },
+            { offset: 0, color: '#7ce8fa' },
+            { offset: 1, color: '#1497c4' },
           ],
         }
       }
@@ -503,52 +600,38 @@ export default function SubDashboard() {
         return {
           type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
           colorStops: [
-            { offset: 0, color: '#c04a4a' },
-            { offset: 1, color: '#8b1a1a' },
+            { offset: 0, color: '#5aa5ff' },
+            { offset: 1, color: '#1e5fb8' },
           ],
         }
       }
       return {
         type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
         colorStops: [
-          { offset: 0, color: '#b06a6a' },
-          { offset: 1, color: '#9a3a3a' },
+          { offset: 0, color: '#4d7fc0' },
+          { offset: 1, color: '#2f5d9e' },
         ],
       }
     }
     return {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(139, 26, 26, 0.05)' } },
-        backgroundColor: 'rgba(255, 252, 246, 0.97)',
-        borderColor: 'rgba(201, 162, 39, 0.55)',
-        borderWidth: 1,
-        padding: [9, 13],
-        textStyle: { fontSize: 12, color: '#342a23' },
-        extraCssText: 'box-shadow: 0 6px 18px rgba(139,26,26,0.14); border-radius: 10px;',
-        formatter: (params) => {
-          const p = params?.[0]
-          if (!p) return ''
-          return `${p.name}<br/>销售额：<b>${MONEY(p.value)}</b>`
-        },
-      },
+      tooltip: { show: false },
       grid: { left: 92, right: 58, top: 10, bottom: 10 },
       xAxis: {
         type: 'value',
         axisLabel: {
-          color: '#a89a88',
+          color: '#7d92b5',
           fontSize: 11,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
         axisLine: { show: false },
         axisTick: { show: false },
-        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(139, 26, 26, 0.07)' } },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(120, 160, 220, 0.12)' } },
       },
       yAxis: {
         type: 'category',
         data: list.map((i) => i.companyName),
         axisLabel: {
-          color: '#4a4038',
+          color: '#d3def0',
           width: 82,
           overflow: 'truncate',
           fontSize: 12.5,
@@ -563,11 +646,6 @@ export default function SubDashboard() {
           type: 'bar',
           barMaxWidth: 15,
           barCategoryGap: '42%',
-          showBackground: true,
-          backgroundStyle: {
-            color: 'rgba(139, 26, 26, 0.06)',
-            borderRadius: [0, 999, 999, 0],
-          },
           data: list.map((i, idx) => {
             const rankFromTop = n - idx
             const gold = rankFromTop === 1
@@ -576,7 +654,7 @@ export default function SubDashboard() {
               itemStyle: {
                 borderRadius: [0, 999, 999, 0],
                 color: barColor(rankFromTop),
-                shadowColor: gold ? 'rgba(201, 162, 39, 0.35)' : 'rgba(122, 20, 20, 0.25)',
+                shadowColor: gold ? 'rgba(34, 211, 238, 0.4)' : 'rgba(47, 128, 237, 0.3)',
                 shadowBlur: 6,
                 shadowOffsetX: 2,
               },
@@ -586,15 +664,25 @@ export default function SubDashboard() {
             show: true,
             position: 'right',
             distance: 8,
-            color: '#8b1a1a',
+            color: '#8fc9ff',
             fontSize: 12,
             fontWeight: 700,
             fontFamily: 'inherit',
             formatter: (p) => MONEY(p.value),
           },
           emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
+            focus: 'none',
+            itemStyle: { shadowBlur: 14 },
+            label: {
+              show: true,
+              color: '#ffffff',
+              fontSize: 13,
+              fontWeight: 800,
+              formatter: (p) => {
+                const amt = Number(p.value || 0)
+                const pct = totalAmount > 0 ? ((amt / totalAmount) * 100).toFixed(1) : '0.0'
+                return `${pct}%`
+              },
             },
           },
         },
@@ -626,14 +714,6 @@ export default function SubDashboard() {
     return { offsiteProvinceAgg: agg, provinceProductsMap: productListMap }
   }, [data.offsiteSales])
 
-  // 诊断 log（构建完数据后立刻打印）
-  useEffect(() => {
-    if (offsiteProvinceAgg.length > 0) {
-      console.log('[map debug] offsiteProvinceAgg:', offsiteProvinceAgg.slice(0, 5))
-      console.log('[map debug] provinceProductsMap keys:', Object.keys(provinceProductsMap).slice(0, 10))
-    }
-  }, [offsiteProvinceAgg, provinceProductsMap])
-
   const offsiteMapOption = useMemo(
     () => {
       const maxVal = Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0)
@@ -641,32 +721,44 @@ export default function SubDashboard() {
         tooltip: {
           trigger: 'item',
           appendToBody: true,
+          backgroundColor: 'rgba(13, 26, 48, 0.97)',
+          borderColor: 'rgba(90, 165, 255, 0.35)',
+          borderWidth: 1,
+          padding: [10, 14],
+          textStyle: { fontSize: 12.5, color: '#d5e2f5' },
+          extraCssText: 'box-shadow: none; border-radius: 10px;',
           formatter: (p) => {
-            const province = p.name || ''
-            const total = Number(p.value || 0)
-            const products = provinceProductsMap[province] || []
-            const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-            let html = `<b style="font-size:13px;color:#1f1a17;">${esc(province)}</b><br/>`
-            html += `<span style="color:#8b1a1a;font-weight:700;">异地销量：${total.toLocaleString('zh-CN')}</span>`
-            if (products.length > 0) {
-              html += `<br/><br/><span style="font-size:10.5px;color:#8a7f73;letter-spacing:0.04em;">产品明细</span><br/>`
-              products.slice(0, 6).forEach((item, idx) => {
-                const dot = idx === 0 ? '#c9a227' : idx === 1 ? '#a52a2a' : '#b5a894'
-                html += `<span style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;gap:14px;">
-                  <span style="display:flex;align-items:center;gap:6px;min-width:0;flex:1;">
-                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
-                    <span style="color:#342a23;font-weight:${idx < 2 ? 600 : 500};font-size:12px;">${esc(item.product)}</span>
-                  </span>
-                  <span style="color:#8b1a1a;font-weight:700;font-variant-numeric:tabular-nums;font-size:12px;flex-shrink:0;">${Number(item.qty || 0).toLocaleString('zh-CN')}</span>
-                </span><br/>`
-              })
-              if (products.length > 6) {
-                html += `<span style="color:#a89a88;font-size:11px;">等 ${products.length} 款产品</span>`
+            try {
+              const province = p.name || ''
+              const total = Number(p.value || 0)
+              const products = provinceProductsMap[province] || []
+              const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+              let html = `<div style="font-weight:700;font-size:13px;color:#eaf2ff;margin-bottom:4px;">${esc(province)}</div>`
+              html += `<div style="color:#7cb8ff;font-weight:700;line-height:19px;">异地销量：${total.toLocaleString('zh-CN')}</div>`
+              if (products.length > 0) {
+                html += `<div style="font-size:10.5px;color:#8fa3c4;letter-spacing:0.04em;border-top:1px dashed rgba(90,165,255,0.25);margin-top:6px;padding-top:5px;">产品明细（共 ${products.length} 款）</div>`
+                html += `<table style="border-collapse:collapse;margin-top:2px;width:250px;"><tbody>`
+                products.slice(0, 6).forEach((item, idx) => {
+                  const dot = idx === 0 ? '#56d8ee' : idx === 1 ? '#5aa5ff' : '#6f87b0'
+                  const weight = idx < 2 ? 600 : 500
+                  html += `<tr>`
+                    + `<td style="padding:2px 0;color:#d5e2f5;font-weight:${weight};font-size:12px;white-space:nowrap;">`
+                    + `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dot};margin-right:6px;vertical-align:middle;"></span>${esc(item.product)}`
+                    + `</td>`
+                    + `<td style="padding:2px 0 2px 12px;color:#8fc9ff;font-weight:700;font-size:12px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${Number(item.qty || 0).toLocaleString('zh-CN')}</td>`
+                    + `</tr>`
+                })
+                html += `</tbody></table>`
+                if (products.length > 6) {
+                  html += `<div style="color:#7d92b5;font-size:11px;">仅展示前 6 款，共 ${products.length} 款</div>`
+                }
+              } else {
+                html += `<div style="color:#7d92b5;font-size:11px;margin-top:2px;">暂无销售明细</div>`
               }
-            } else {
-              html += `<br/><span style="color:#a89a88;font-size:11px;">暂无销售明细</span>`
+              return html
+            } catch (e) {
+              return `${p.name}<br/>异地销量：${Number(p.value || 0).toLocaleString('zh-CN')}`
             }
-            return html
           },
         },
         visualMap: {
@@ -675,8 +767,8 @@ export default function SubDashboard() {
           left: 14,
           bottom: 18,
           text: ['高 High', '低 Low'],
-          textStyle: { color: '#7a6f65', fontSize: 11.5, fontWeight: 500 },
-          inRange: { color: ['#f5e8d3', '#e6c066', '#a52a2a', '#5f1010'] },
+          textStyle: { color: '#9db2d0', fontSize: 11.5, fontWeight: 500 },
+          inRange: { color: ['#12294c', '#1e5fb8', '#2f80ed', '#5fd4f2'] },
           calculable: false,
           itemWidth: 14,
           itemHeight: 100,
@@ -695,36 +787,37 @@ export default function SubDashboard() {
           aspectScale: 0.82,
             selectedMode: false,
             itemStyle: {
-              areaColor: '#f5eee1',
-              borderColor: '#c7b48f',
+              areaColor: '#162849',
+              borderColor: '#3a5a90',
               borderWidth: 0.8,
-              shadowColor: 'rgba(139, 26, 26, 0.06)',
+              shadowColor: 'rgba(0, 0, 0, 0.35)',
               shadowBlur: 5,
               shadowOffsetY: 2,
             },
             label: {
               show: true,
-              color: '#574c40',
+              color: '#eaf2ff',
               fontSize: 10.5,
               fontWeight: 500,
+              textShadow: '0 1px 3px rgba(0,0,0,0.85)',
               formatter: (p) => {
                 if (!p.name || p.name.includes('南海') || p.name.includes('九段')) return ''
                 return p.name
               },
             },
             emphasis: {
-              label: { show: true, color: '#1f1a17', fontWeight: 700, fontSize: 12 },
+              label: { show: true, color: '#ffffff', fontWeight: 700, fontSize: 12, textShadow: '0 1px 3px rgba(0,0,0,0.85)' },
               itemStyle: {
-                areaColor: '#e9b949',
-                borderColor: '#b8860b',
+                areaColor: '#2f80ed',
+                borderColor: '#7cc7ff',
                 borderWidth: 1.2,
                 shadowBlur: 12,
-                shadowColor: 'rgba(184, 134, 11, 0.4)',
+                shadowColor: 'rgba(47, 128, 237, 0.5)',
               },
             },
             select: {
-              label: { color: '#1f1a17', fontWeight: 700 },
-              itemStyle: { areaColor: '#e9b949' },
+              label: { color: '#ffffff', fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.85)' },
+              itemStyle: { areaColor: '#2f80ed', borderColor: '#7cc7ff' },
             },
             data: offsiteProvinceAgg,
           },
@@ -796,17 +889,6 @@ export default function SubDashboard() {
       width: 78,
       align: 'right',
       render: (v) => <span className={styles.money}>{MONEY(v)}</span>,
-    },
-    {
-      title: (
-        <span className={styles.colBi}>
-          金额<span>Amount</span>
-        </span>
-      ),
-      dataIndex: 'amount',
-      width: 88,
-      align: 'right',
-      render: (v) => MONEY(v),
     },
   ]
 
@@ -1031,6 +1113,7 @@ export default function SubDashboard() {
                   <ReactECharts
                     key={`structure-${chartKey}`}
                     option={structureOption}
+                    notMerge
                     style={chartFill}
                     opts={{ renderer: 'canvas' }}
                   />
@@ -1052,6 +1135,7 @@ export default function SubDashboard() {
                   <ReactECharts
                     key={`rank-${chartKey}`}
                     option={rankOption}
+                    notMerge
                     style={chartFill}
                     opts={{ renderer: 'canvas' }}
                   />
