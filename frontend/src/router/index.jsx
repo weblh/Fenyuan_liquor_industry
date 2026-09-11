@@ -25,6 +25,7 @@ import KingdeeVoucherPage from '@/pages/Finance/KingdeeVoucher'
 import KingdeeCredentialPage from '@/pages/Kingdee/Credential'
 import KingdeeAccountSetPage from '@/pages/Kingdee/AccountSet'
 import BankVoucherPage from '@/pages/Kingdee/BankVoucher'
+import SettingsPage from '@/pages/Settings'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
 
@@ -67,6 +68,7 @@ const router = createBrowserRouter(
         { path: 'kingdee/credential', element: <KingdeeCredentialPage /> },
         { path: 'kingdee/account-set', element: <KingdeeAccountSetPage /> },
         { path: 'kingdee/bank-voucher', element: <BankVoucherPage /> },
+        { path: 'settings', element: <SettingsPage /> },
       ],
     },
     {

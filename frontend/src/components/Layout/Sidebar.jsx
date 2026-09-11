@@ -52,37 +52,6 @@ const SUB_DASHBOARD_ITEM = {
 const FALLBACK_MENUS = [
   DASHBOARD_ITEM,
   {
-    id: 1,
-    path: '/system',
-    name: '系统管理',
-    icon: 'SettingOutlined',
-    children: [
-      { id: 21, path: '/system/user', name: '用户管理', icon: 'UserOutlined' },
-      { id: 22, path: '/system/role', name: '角色管理', icon: 'TeamOutlined' },
-      { id: 23, path: '/system/menu', name: '菜单管理', icon: 'MenuOutlined' },
-      { id: 24, path: '/system/dept', name: '部门管理', icon: 'ApartmentOutlined' },
-    ],
-  },
-  {
-    id: 3,
-    path: '/log',
-    name: '日志管理',
-    icon: 'FileTextOutlined',
-    children: [
-      { id: 31, path: '/log/oper', name: '操作日志', icon: 'ProfileOutlined' },
-      { id: 32, path: '/log/login', name: '登录日志', icon: 'LoginOutlined' },
-    ],
-  },
-  {
-    id: 9,
-    path: '/settings',
-    name: '系统配置',
-    icon: 'ToolOutlined',
-    children: [
-      { id: 25, path: '/settings/config', name: '参数配置', icon: 'SettingOutlined' },
-    ],
-  },
-  {
     id: 26,
     path: '/business',
     name: '业务管理',
@@ -128,6 +97,37 @@ const FALLBACK_MENUS = [
     visible: 1,
     status: 1,
   },
+  {
+    id: 99,
+    path: '/settings',
+    name: '设置',
+    icon: 'SettingOutlined',
+    children: [
+      {
+        id: 1,
+        path: '/system',
+        name: '系统管理',
+        icon: 'UserSwitchOutlined',
+        children: [
+          { id: 21, path: '/system/user', name: '用户管理', icon: 'UserOutlined' },
+          { id: 22, path: '/system/role', name: '角色管理', icon: 'TeamOutlined' },
+          { id: 23, path: '/system/menu', name: '菜单管理', icon: 'MenuOutlined' },
+          { id: 24, path: '/system/dept', name: '部门管理', icon: 'ApartmentOutlined' },
+        ],
+      },
+      {
+        id: 3,
+        path: '/log',
+        name: '日志管理',
+        icon: 'FileTextOutlined',
+        children: [
+          { id: 31, path: '/log/oper', name: '操作日志', icon: 'ProfileOutlined' },
+          { id: 32, path: '/log/login', name: '登录日志', icon: 'LoginOutlined' },
+        ],
+      },
+      { id: 25, path: '/settings/config', name: '参数配置', icon: 'ControlOutlined' },
+    ],
+  },
 ]
 
 export default function Sidebar() {
@@ -139,13 +139,87 @@ export default function Sidebar() {
 
   const items = useMemo(() => {
     const source = menus?.length ? filterVisibleMenus(menus) : FALLBACK_MENUS
-    const withHome = source.some((m) => m.path === '/dashboard')
-      ? source
-      : [DASHBOARD_ITEM, ...source]
+    // 从后端菜单里提取要并入"设置"的三组，然后从顶层删掉
+    const moveToSettings = ['系统管理', '日志管理', '系统配置']
+    let collected = []
+    let stripped = source.filter((m) => {
+      if (moveToSettings.includes(m.name)) {
+        collected.push(m)
+        return false
+      }
+      return true
+    })
+    // 系统配置的 path 也是 /settings，可能单独匹配
+    stripped = stripped.filter((m) => !(m.path === '/settings' && m.name !== '设置'))
+    const withHome = stripped.some((m) => m.path === '/dashboard')
+      ? stripped
+      : [DASHBOARD_ITEM, ...stripped]
     const withSub = withHome.some((m) => m.path === '/sub-dashboard')
       ? withHome
       : [...withHome, SUB_DASHBOARD_ITEM]
-    return mapMenusToItems(withSub)
+    // 构造/合并"设置"组
+    const SETTINGS_CHILDREN_ORDER = ['系统管理', '日志管理', '参数配置']
+    const childrenMap = {}
+    collected.forEach((m) => {
+      // 系统配置 → 参数配置（把它变成设置的子项）
+      if (m.name === '系统配置') {
+        ;(m.children || []).forEach((c) => {
+          if (c.name === '参数配置') childrenMap['参数配置'] = c
+        })
+      } else {
+        childrenMap[m.name] = m
+      }
+    })
+    const settingsChildren = SETTINGS_CHILDREN_ORDER
+      .map((name) => childrenMap[name])
+      .filter(Boolean)
+
+    const existingSettings = withSub.find((m) => m.name === '设置')
+    if (existingSettings) {
+      const existingPaths = new Set((existingSettings.children || []).map((c) => c.path))
+      settingsChildren.forEach((c) => {
+        if (c.path && !existingPaths.has(c.path)) {
+          existingSettings.children = existingSettings.children || []
+          existingSettings.children.push(c)
+        }
+      })
+      return mapMenusToItems(withSub)
+    }
+    const SETTINGS_ITEM = {
+      id: 99,
+      path: '/settings',
+      name: '设置',
+      icon: 'SettingOutlined',
+      children:
+        settingsChildren.length > 0
+          ? settingsChildren
+          : [
+              {
+                id: 1,
+                path: '/system',
+                name: '系统管理',
+                icon: 'UserSwitchOutlined',
+                children: [
+                  { id: 21, path: '/system/user', name: '用户管理', icon: 'UserOutlined' },
+                  { id: 22, path: '/system/role', name: '角色管理', icon: 'TeamOutlined' },
+                  { id: 23, path: '/system/menu', name: '菜单管理', icon: 'MenuOutlined' },
+                  { id: 24, path: '/system/dept', name: '部门管理', icon: 'ApartmentOutlined' },
+                ],
+              },
+              {
+                id: 3,
+                path: '/log',
+                name: '日志管理',
+                icon: 'FileTextOutlined',
+                children: [
+                  { id: 31, path: '/log/oper', name: '操作日志', icon: 'ProfileOutlined' },
+                  { id: 32, path: '/log/login', name: '登录日志', icon: 'LoginOutlined' },
+                ],
+              },
+              { id: 25, path: '/settings/config', name: '参数配置', icon: 'ControlOutlined' },
+            ],
+    }
+    return mapMenusToItems([...withSub, SETTINGS_ITEM])
   }, [menus])
 
   const selectedKeys = [location.pathname]

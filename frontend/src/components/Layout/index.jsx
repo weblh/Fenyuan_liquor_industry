@@ -36,6 +36,7 @@ const ROUTE_TITLES = {
   '/kingdee/credential': '账号密码',
   '/kingdee/account-set': '账套',
   '/kingdee/bank-voucher': '银行流水凭证',
+  '/settings': '设置',
 }
 
 export default function MainLayout() {

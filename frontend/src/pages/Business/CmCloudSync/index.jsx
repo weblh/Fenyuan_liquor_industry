@@ -26,7 +26,7 @@ export default function CmCloudSyncPage() {
     try {
       // 轻量探测：走后端 sync-bills 会很重；用公开 captcha 同机探测改由前端直连易 CORS
       // 改为调用 sync-master 无关端口。这里用 syncBills 前的说明即可。
-      const res = await request.get('/integration/cmcloud/api-status').catch(() => null)
+      const res = await request.get('/integration/').catch(() => null)
       if (res && typeof res.reachable === 'boolean') {
         setApiOk(res.reachable)
         return

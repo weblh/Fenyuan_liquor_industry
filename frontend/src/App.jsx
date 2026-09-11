@@ -5,7 +5,7 @@ import router from '@/router'
 
 const theme = {
   token: {
-    colorPrimary: '#8B1A1A',
+    colorPrimary: '#2f80ed',
     borderRadius: 6,
   },
 }
