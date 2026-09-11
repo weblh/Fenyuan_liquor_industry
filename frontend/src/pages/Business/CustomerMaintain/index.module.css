@@ -1,78 +1,23 @@
-/* ===== 客户维护监管页 · 酒红 / 金 暖调 ===== */
+/* ===== 客户维护监管页 · 蓝黑科技调 ===== */
 
 /* 搜索区：底部加淡分隔线 + 更舒展的间距 */
 .wrap {
-  --wine: #8b1a1a;
-  --wineDeep: #7a1414;
-  --gold: #c9a227;
-  --ink: #1f1a17;
-  --muted: #6b625a;
-  border: 1px solid rgba(139, 26, 26, 0.09);
-  border-radius: 14px;
+  border: 1px solid rgba(90, 165, 255, 0.14);
+  border-radius: 12px;
   padding: 18px 20px 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(253, 250, 245, 0.97));
-  box-shadow: 0 1px 2px rgba(31, 26, 23, 0.03), 0 8px 22px rgba(31, 26, 23, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, rgba(20, 37, 66, 0.55), rgba(13, 26, 48, 0.5));
+  box-shadow: 0 1px 2px rgba(2, 8, 20, 0.3), 0 8px 22px rgba(2, 8, 20, 0.25);
 }
 
 /* 搜索表单区域 */
 .wrap :global(.ant-form) {
   padding-bottom: 14px;
   margin-bottom: 14px !important;
-  border-bottom: 1px dashed rgba(139, 26, 26, 0.12);
+  border-bottom: 1px dashed rgba(90, 165, 255, 0.16);
 }
 
 .wrap :global(.ant-form-item) {
   margin-bottom: 0;
-}
-
-.wrap :global(.ant-input),
-.wrap :global(.ant-input-affix-wrapper),
-.wrap :global(.ant-select-selector) {
-  border-radius: 8px !important;
-  border-color: rgba(139, 26, 26, 0.16) !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.wrap :global(.ant-input:hover),
-.wrap :global(.ant-input-affix-wrapper:hover),
-.wrap :global(.ant-select-selector:hover) {
-  border-color: rgba(139, 26, 26, 0.32) !important;
-}
-
-.wrap :global(.ant-input-affix-wrapper-focused),
-.wrap :global(.ant-input-affix-wrapper:focus),
-.wrap :global(.ant-input:focus),
-.wrap :global(.ant-select-focused .ant-select-selector) {
-  border-color: #8b1a1a !important;
-  box-shadow: 0 0 0 2px rgba(139, 26, 26, 0.12) !important;
-}
-
-/* 按钮：主按钮酒红 + 辅按钮金描边 */
-.wrap :global(.ant-btn-primary) {
-  background: linear-gradient(135deg, #a52525, #8b1a1a) !important;
-  border-color: #7a1414 !important;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(139, 26, 26, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  font-weight: 600;
-}
-
-.wrap :global(.ant-btn-primary:hover) {
-  background: linear-gradient(135deg, #b83434, #9a2424) !important;
-  border-color: #8b1a1a !important;
-  box-shadow: 0 4px 10px rgba(139, 26, 26, 0.3);
-}
-
-.wrap :global(.ant-btn:not(.ant-btn-primary)) {
-  border-radius: 8px;
-  border-color: rgba(139, 26, 26, 0.22);
-  color: #5a4a3f;
-  font-weight: 500;
-}
-
-.wrap :global(.ant-btn:not(.ant-btn-primary):hover) {
-  border-color: #8b1a1a;
-  color: #8b1a1a;
-  background: rgba(139, 26, 26, 0.04);
 }
 
 /* ===== 表格 ===== */
@@ -86,9 +31,9 @@
   font-size: 11.5px;
   font-weight: 700;
   padding: 12px 14px !important;
-  background: linear-gradient(180deg, #fbf5e9, #f4ead3) !important;
-  color: #5a4e3e;
-  border-bottom: 1px solid rgba(139, 26, 26, 0.18) !important;
+  background: linear-gradient(180deg, #162849, #11203d) !important;
+  color: #9db2d0;
+  border-bottom: 1px solid rgba(90, 165, 255, 0.18) !important;
   letter-spacing: 0.03em;
 }
 
@@ -99,13 +44,13 @@
 /* 表体 */
 .table :global(.ant-table-tbody > tr > td) {
   padding: 12px 14px !important;
-  color: #2a231e;
-  border-bottom: 1px solid rgba(31, 26, 23, 0.05);
+  color: #d3def0;
+  border-bottom: 1px solid rgba(90, 165, 255, 0.08);
   transition: background 0.18s ease;
 }
 
 .table :global(.ant-table-tbody > tr:hover > td) {
-  background: rgba(139, 26, 26, 0.05) !important;
+  background: rgba(47, 128, 237, 0.07) !important;
 }
 
 .table :global(.ant-table-tbody > tr:last-child > td) {
@@ -114,60 +59,17 @@
 
 .table :global(.ant-table-tbody > tr > td:first-child) {
   font-weight: 600;
-  color: #342a23;
+  color: #e8f0fc;
 }
 
-/* 空状态柔和化 */
+/* 空状态 */
 .table :global(.ant-empty-description) {
-  color: #8a7f73;
+  color: #7d92b5;
 }
 
 /* ===== 分页 ===== */
 .wrap :global(.ant-pagination) {
   margin-top: 18px !important;
-}
-
-.wrap :global(.ant-pagination-item) {
-  border-radius: 8px !important;
-  border: 1px solid rgba(139, 26, 26, 0.16);
-  background: #fff;
-  transition: all 0.18s ease;
-}
-
-.wrap :global(.ant-pagination-item a) {
-  color: #6b5f4f;
-}
-
-.wrap :global(.ant-pagination-item:hover) {
-  border-color: #8b1a1a;
-}
-
-.wrap :global(.ant-pagination-item:hover a) {
-  color: #8b1a1a;
-}
-
-.wrap :global(.ant-pagination-item-active) {
-  background: linear-gradient(135deg, #a52525, #8b1a1a) !important;
-  border-color: #7a1414 !important;
-  box-shadow: 0 2px 6px rgba(139, 26, 26, 0.25);
-}
-
-.wrap :global(.ant-pagination-item-active a) {
-  color: #fff !important;
-  font-weight: 700;
-}
-
-.wrap :global(.ant-pagination-prev .ant-pagination-item-link),
-.wrap :global(.ant-pagination-next .ant-pagination-item-link) {
-  border-radius: 8px;
-  border-color: rgba(139, 26, 26, 0.16);
-  color: #6b5f4f;
-}
-
-.wrap :global(.ant-pagination-prev .ant-pagination-item-link:hover),
-.wrap :global(.ant-pagination-next .ant-pagination-item-link:hover) {
-  border-color: #8b1a1a;
-  color: #8b1a1a;
 }
 
 /* ===== 未复购天数徽章（完整数据范围 60–260+ 天） ===== */
@@ -211,43 +113,43 @@
 
 /* 正常 / 非预警（< 60 天）：绿 */
 .badgeSafe {
-  color: #2f6f4a;
-  background: linear-gradient(135deg, rgba(63, 148, 96, 0.18), rgba(47, 111, 74, 0.08));
-  border: 1px solid rgba(47, 111, 74, 0.28);
+  color: #5fd99f;
+  background: linear-gradient(135deg, rgba(46, 204, 138, 0.16), rgba(46, 204, 138, 0.07));
+  border: 1px solid rgba(46, 204, 138, 0.3);
 }
 
-/* 刚预警（60–99 天）：中性暖灰 */
+/* 刚预警（60–99 天）：中性蓝灰 */
 .badgeMild {
-  color: #6b625a;
-  background: linear-gradient(135deg, rgba(107, 98, 90, 0.14), rgba(107, 98, 90, 0.06));
-  border: 1px solid rgba(107, 98, 90, 0.22);
+  color: #a9b8cf;
+  background: linear-gradient(135deg, rgba(125, 146, 181, 0.16), rgba(125, 146, 181, 0.07));
+  border: 1px solid rgba(125, 146, 181, 0.28);
 }
 
-/* 中危（100–149 天）：琥珀金 */
+/* 中危（100–149 天）：琥珀金（深色底调亮） */
 .badgeWarn {
-  color: #8a6a12;
-  background: linear-gradient(135deg, rgba(236, 200, 90, 0.3), rgba(201, 162, 39, 0.14));
-  border: 1px solid rgba(201, 162, 39, 0.45);
+  color: #f5c451;
+  background: linear-gradient(135deg, rgba(245, 196, 81, 0.16), rgba(245, 196, 81, 0.07));
+  border: 1px solid rgba(245, 196, 81, 0.36);
 }
 
-/* 较高（150–199 天）：酒红浅底 */
+/* 较高（150–199 天）：橙红 */
 .badgeHigh {
-  color: #8b1a1a;
-  background: linear-gradient(135deg, rgba(176, 42, 42, 0.16), rgba(139, 26, 26, 0.09));
-  border: 1px solid rgba(139, 26, 26, 0.26);
+  color: #ff9a7a;
+  background: linear-gradient(135deg, rgba(255, 138, 106, 0.16), rgba(255, 138, 106, 0.07));
+  border: 1px solid rgba(255, 138, 106, 0.34);
 }
 
-/* 高危（≥ 200 天）：实心酒红 */
+/* 高危（≥ 200 天）：实心红 */
 .badgeHot {
   color: #fff;
-  background: linear-gradient(135deg, #b02a2a, #7a1414);
-  border: 1px solid rgba(122, 20, 20, 0.5);
-  box-shadow: 0 2px 6px rgba(122, 20, 20, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, #e05656, #b52a2a);
+  border: 1px solid rgba(224, 86, 86, 0.5);
+  box-shadow: 0 2px 8px rgba(224, 86, 86, 0.3);
 }
 
 .badgeHot .dot {
-  background: #ffd9a8;
-  box-shadow: 0 0 0 2px rgba(255, 217, 168, 0.25);
+  background: #ffd9d9;
+  box-shadow: 0 0 0 2px rgba(255, 217, 217, 0.25);
 }
 
 /* ===== 预警状态徽章 ===== */
@@ -264,14 +166,14 @@
 
 .alertChip.alerted {
   color: #fff;
-  background: linear-gradient(135deg, #a52525, #7a1414);
-  box-shadow: 0 2px 6px rgba(139, 26, 26, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, #e05656, #b52a2a);
+  box-shadow: 0 2px 8px rgba(224, 86, 86, 0.28);
 }
 
 .alertChip.normal {
-  color: #2f6f4a;
-  background: linear-gradient(135deg, rgba(63, 148, 96, 0.18), rgba(47, 111, 74, 0.08));
-  border: 1px solid rgba(47, 111, 74, 0.28);
+  color: #5fd99f;
+  background: linear-gradient(135deg, rgba(46, 204, 138, 0.16), rgba(46, 204, 138, 0.07));
+  border: 1px solid rgba(46, 204, 138, 0.3);
 }
 
 /* ===== 操作列链接按钮 ===== */
@@ -279,19 +181,4 @@
   font-weight: 500;
   padding: 0 6px;
   height: auto;
-}
-
-.table :global(.ant-btn-link:not(.ant-btn-dangerous)) {
-  color: #8b1a1a;
-}
-
-.table :global(.ant-btn-link:not(.ant-btn-dangerous):hover) {
-  color: #a52525;
-}
-
-/* ===== Alert 信息条 ===== */
-.wrap :global(.ant-alert-info) {
-  border-radius: 10px;
-  border-color: rgba(201, 162, 39, 0.35);
-  background: linear-gradient(135deg, rgba(250, 243, 228, 0.95), rgba(255, 250, 240, 0.9));
 }

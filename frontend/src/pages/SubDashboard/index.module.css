@@ -1059,17 +1059,6 @@
   width: 100% !important;
 }
 
-.mapBody {
-  /* 旧样式保留兼容（JSX 已不再引用） */
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(190px, 1fr);
-  gap: 12px;
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-  align-items: stretch;
-}
-
 .mapChart {
   flex: 1;
   width: 100%;
@@ -1093,155 +1082,6 @@
   pointer-events: none;
   border-radius: 10px;
   box-shadow: inset 0 0 40px rgba(47, 128, 237, 0.04);
-}
-
-.mapRank {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  padding: 12px 10px 8px;
-  background: linear-gradient(180deg, rgba(20, 37, 66, 0.95), rgba(13, 26, 48, 0.9));
-  border-radius: 12px;
-  border: 1px solid rgba(47, 128, 237, 0.1);
-  box-shadow: inset 0 1px 0 rgba(140, 195, 255, 0.12);
-  overflow: hidden;
-}
-
-.mapRankTitle {
-  margin-bottom: 10px;
-  flex-shrink: 0;
-  color: var(--muted);
-  line-height: 1.25;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(47, 128, 237, 0.12);
-}
-
-.mapRankTitle .biZh {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #c9d8ee;
-}
-
-.mapRankTitle .biEn {
-  display: block;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  opacity: 0.66;
-  text-transform: uppercase;
-  margin-top: 1px;
-}
-
-.mapRankList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-}
-
-.mapRankItem {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) 78px auto;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  padding: 3px 6px;
-  border-radius: 8px;
-  transition: background 0.15s ease;
-}
-
-.mapRankItem:hover {
-  background: rgba(47, 128, 237, 0.05);
-}
-
-.mapRankNo {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: #8fa3c4;
-  background: rgba(140, 195, 255, 0.14);
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.mapRankTop {
-  color: #f2f8ff;
-  background: linear-gradient(135deg, #2570d8, #2f80ed);
-  box-shadow: 0 2px 6px rgba(47, 128, 237, 0.3);
-}
-
-/* 第 1 名：金色冠军徽章 */
-.mapRankNo.rankGold {
-  background: linear-gradient(135deg, #3dd6f2, #1497c4);
-  color: #f2f8ff;
-  box-shadow: 0 3px 8px rgba(34, 180, 220, 0.42), inset 0 1px 0 rgba(180, 230, 255, 0.6);
-}
-
-.mapRankName {
-  color: #d3def0;
-  font-weight: 600;
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mapRankBarWrap {
-  height: 7px;
-  border-radius: 999px;
-  background: rgba(47, 128, 237, 0.09);
-  overflow: hidden;
-  width: 100%;
-}
-
-.mapRankBar {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #2fd3ef, #2f80ed);
-  box-shadow: 0 1px 2px rgba(47, 128, 237, 0.2);
-  transition: width 0.6s ease;
-}
-
-/* 第 1 名条形：金色高光 */
-.mapRankBar.barGold {
-  background: linear-gradient(90deg, #7ce8fa, #3dd6f2 55%, #1497c4);
-}
-
-.mapRankVal {
-  color: var(--wine);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  min-width: 44px;
-  text-align: right;
-  font-size: 13px;
-  letter-spacing: 0.01em;
-}
-
-.mapRankList::-webkit-scrollbar {
-  width: 4px;
-}
-
-.mapRankList::-webkit-scrollbar-thumb {
-  background: rgba(47, 128, 237, 0.22);
-  border-radius: 2px;
-}
-
-.mapRankList::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .daysBadge {
@@ -1491,10 +1331,6 @@
 
   .mainGrid > .panel {
     min-height: 280px;
-  }
-
-  .mapBody {
-    grid-template-columns: 1fr;
   }
 
   .mapChart {
