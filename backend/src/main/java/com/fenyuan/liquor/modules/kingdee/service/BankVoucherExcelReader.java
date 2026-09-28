@@ -497,6 +497,8 @@ public final class BankVoucherExcelReader {
             row.setSummary(cols.get(line, cols.summary));
             row.setPurpose(cols.get(line, cols.purpose));
             row.setRemark(cols.get(line, cols.remark));
+            // 补列手续费/收款金额 → 写入备注供扫码拆分录识别（FEE / 收款金额）
+            appendRcbFeeMarkers(row, cols, line, amount);
             row.setTradeSerialNo(serial);
             row.setReceiptNo(cols.get(line, cols.receiptNo));
             row.setDirectionFlag(direction);
@@ -516,6 +518,86 @@ public final class BankVoucherExcelReader {
             rows.add(row);
         }
         return rows;
+    }
+
+    /**
+     * 农商行 Excel 补列「手续费」「收款金额」写入备注，供扫码收款拆红字手续费分录。
+     * 例：FEE24.70;收款金额12350.00
+     * 单元格若为公式（=ROUND(F/(1-0.2%),2)），按同口径用到账净额反推。
+     */
+    private static void appendRcbFeeMarkers(KingdeeBankVoucherDetailExcel row, ColMap cols,
+                                            Map<Integer, String> line, BigDecimal bankNet) {
+        String feeRaw = cols.get(line, cols.feeAmount);
+        String grossRaw = cols.get(line, cols.grossAmount);
+        // 无补列则跳过（原始回单无此列）
+        if (cols.feeAmount == null && cols.grossAmount == null) {
+            return;
+        }
+        BigDecimal fee = parseSignedAmount(feeRaw);
+        BigDecimal gross = parseSignedAmount(grossRaw);
+        if (fee != null) {
+            fee = fee.abs().setScale(2, RoundingMode.HALF_UP);
+        }
+        if (gross != null) {
+            gross = gross.abs().setScale(2, RoundingMode.HALF_UP);
+        }
+        // 公式单元格读不到数 / EasyExcel 对未缓存公式返回空：与表内 ROUND(净额/(1-0.2%),2) 同口径反推
+        // 显式填写 0 的手续费不会进入（fee 已解析为 0）
+        boolean formulaOrBlank = looksLikeExcelFormula(feeRaw) || looksLikeExcelFormula(grossRaw)
+                || (!StringUtils.hasText(feeRaw) && !StringUtils.hasText(grossRaw));
+        if (bankNet != null && bankNet.compareTo(BigDecimal.ZERO) > 0
+                && (fee == null || gross == null)
+                && formulaOrBlank
+                && (cols.feeAmount != null || cols.grossAmount != null)) {
+            BigDecimal computedGross = bankNet.divide(new BigDecimal("0.998"), 2, RoundingMode.HALF_UP);
+            BigDecimal computedFee = computedGross.subtract(bankNet).setScale(2, RoundingMode.HALF_UP);
+            if (gross == null) {
+                gross = computedGross;
+            }
+            if (fee == null) {
+                fee = computedFee;
+            }
+        }
+        if ((fee == null || fee.compareTo(BigDecimal.ZERO) <= 0)
+                && (gross == null || bankNet == null || gross.compareTo(bankNet) <= 0)) {
+            return;
+        }
+        StringBuilder marker = new StringBuilder();
+        if (fee != null && fee.compareTo(BigDecimal.ZERO) > 0) {
+            marker.append("FEE").append(fee.toPlainString());
+        }
+        if (gross != null && bankNet != null && gross.compareTo(bankNet) > 0) {
+            if (marker.length() > 0) {
+                marker.append(';');
+            }
+            marker.append("收款金额").append(gross.toPlainString());
+            if (fee == null || fee.compareTo(BigDecimal.ZERO) <= 0) {
+                BigDecimal implied = gross.subtract(bankNet).setScale(2, RoundingMode.HALF_UP);
+                if (implied.compareTo(BigDecimal.ZERO) > 0) {
+                    if (marker.length() > 0) {
+                        marker.append(';');
+                    }
+                    marker.append("FEE").append(implied.toPlainString());
+                }
+            }
+        }
+        if (marker.length() == 0) {
+            return;
+        }
+        String old = row.getRemark();
+        if (StringUtils.hasText(old)) {
+            row.setRemark(old.trim() + ";" + marker);
+        } else {
+            row.setRemark(marker.toString());
+        }
+    }
+
+    private static boolean looksLikeExcelFormula(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return false;
+        }
+        String t = raw.trim();
+        return t.startsWith("=") || t.toUpperCase().contains("ROUND") || t.contains("0.2%");
     }
 
     /** 将「2026年08月03日」等转为 yyyyMMdd，便于记账日期匹配 */
@@ -744,6 +826,10 @@ public final class BankVoucherExcelReader {
         Integer tradeDate;
         Integer valueDate;
         Integer recordId;
+        /** 农商行等补列：手续费 */
+        Integer feeAmount;
+        /** 农商行等补列：收款金额/客户实付 */
+        Integer grossAmount;
 
         static ColMap fromCcbHeader(Map<Integer, String> headerRow) {
             Map<Integer, String> normalized = normalizeMap(headerRow);
@@ -852,6 +938,10 @@ public final class BankVoucherExcelReader {
             m.purpose = find(normalized, h -> h.contains("用途") || h.contains("其他摘要"));
             m.counterpartyBank = find(normalized, h -> h.contains("机构名称") || h.contains("营业机构"));
             m.tradeSerialNo = find(normalized, h -> h.contains("交易流水"));
+            // 人工补列：手续费 / 收款金额（客户实付），写入凭证时拆红字手续费分录
+            m.feeAmount = find(normalized, h -> h.equals("手续费") || h.startsWith("手续费"));
+            m.grossAmount = find(normalized, h -> h.equals("收款金额") || h.contains("收款金额")
+                    || h.equals("实付金额") || h.contains("客户实付"));
             return m;
         }
 

@@ -89,17 +89,22 @@ public class KingdeeSupplierQueryService {
             return null;
         }
         String trimmed = supplierName.trim();
-        List<SupplierDetailVO> suppliers = querySuppliers(kingdeeUrl, sessionId, null, trimmed, useOrgCode);
-        if (suppliers.isEmpty() && useOrgCode != null && !useOrgCode.isEmpty()) {
-            suppliers = querySuppliers(kingdeeUrl, sessionId, null, trimmed, null);
+        // 财务确认：供应商按整个集团搜索，不限当前账套组织
+        List<SupplierDetailVO> group = querySuppliers(kingdeeUrl, sessionId, null, trimmed, null);
+        String exact = firstExactSupplierNumber(group, trimmed);
+        if (exact != null) {
+            return exact;
+        }
+        // 非精确：优先当前使用组织，再回落集团模糊
+        List<SupplierDetailVO> suppliers = group;
+        if (useOrgCode != null && !useOrgCode.isEmpty()) {
+            List<SupplierDetailVO> local = querySuppliers(kingdeeUrl, sessionId, null, trimmed, useOrgCode);
+            if (!local.isEmpty()) {
+                suppliers = local;
+            }
         }
         if (suppliers.isEmpty()) {
             return null;
-        }
-        for (SupplierDetailVO supplier : suppliers) {
-            if (trimmed.equals(supplier.getFname())) {
-                return supplier.getFnumber();
-            }
         }
         for (SupplierDetailVO supplier : suppliers) {
             // 档案名包含完整检索名（更长/含检索全称）
@@ -121,6 +126,18 @@ public class KingdeeSupplierQueryService {
         return null;
     }
 
+    private String firstExactSupplierNumber(List<SupplierDetailVO> suppliers, String trimmed) {
+        if (suppliers == null || suppliers.isEmpty()) {
+            return null;
+        }
+        for (SupplierDetailVO supplier : suppliers) {
+            if (trimmed.equals(supplier.getFname())) {
+                return supplier.getFnumber();
+            }
+        }
+        return null;
+    }
+
     /**
      * 供应商未匹配时的说明；分支机构若仅有总公司档案会单独提示。
      */
@@ -131,10 +148,7 @@ public class KingdeeSupplierQueryService {
             return "对方户名为空，无法匹配金蝶供应商";
         }
         StringBuilder msg = new StringBuilder();
-        msg.append("未在金蝶供应商档案找到「").append(name).append("」");
-        if (useOrgCode != null && !useOrgCode.trim().isEmpty()) {
-            msg.append("（使用组织 ").append(useOrgCode.trim()).append("）");
-        }
+        msg.append("未在金蝶集团供应商档案找到「").append(name).append("」");
         if (KingdeeVoucherQueryService.hasRegionalBranchSuffix(name)) {
             String parent = KingdeeVoucherQueryService.stripRegionalBranchSuffix(name);
             if (parent != null && !parent.isEmpty() && !parent.equals(name)) {

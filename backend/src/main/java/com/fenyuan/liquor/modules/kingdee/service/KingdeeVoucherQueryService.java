@@ -1255,9 +1255,8 @@ public class KingdeeVoucherQueryService {
 
     /**
      * 按客户名称查编码。
-     * 组织校验同时支持：使用组织编码（FNumber）+ 使用组织名称（如「广东汾源酒业有限公司」）。
-     * 注意：账簿编码不一定等于客户「使用组织」的 FNumber，不能只靠编码过滤。
-     * 扫码收款等清算客户常为租户共享维度（界面可选但使用组织可能挂在其他公司），精确全称命中即接受。
+     * 财务确认：客户档案按整个集团搜索，不限当前账套组织（汾源）。
+     * 优先当前组织精确/模糊命中；否则集团内精确全称命中即接受；非精确命中仍要求组织兼容，避免误配。
      */
     public String findCustomerNumberByName(String kingdeeUrl, String sessionId,
                                            String customerName, String useOrgCode,
@@ -1278,7 +1277,7 @@ public class KingdeeVoucherQueryService {
                 return hit.number;
             }
         }
-        // 3) 不限组织查出后，用编码或名称判断是否属于当前账套组织
+        // 3) 集团不限组织
         CustomerHit global = findCustomerHitInternal(kingdeeUrl, sessionId, trimmed, null, null);
         if (global == null) {
             return null;
@@ -1288,26 +1287,14 @@ public class KingdeeVoucherQueryService {
                     trimmed, global.number, global.useOrg, global.useOrgName);
             return global.number;
         }
-        // 精确全称命中时：账簿组织名与客户使用组织名一致即可
-        if (global.exactName && orgNameCompatible(global.useOrgName, useOrgNameHint)) {
-            log.warn("客户「{}」精确命中 {}，使用组织名「{}」与账套组织「{}」匹配（组织编码配置={}，客户组织编码={}）",
-                    trimmed, global.number, global.useOrgName, useOrgNameHint, useOrgCode, global.useOrg);
-            return global.number;
-        }
-        // 扫码/微信等清算客户：租户内共享维度，凭证界面可选，不因使用组织挂在其他公司而拒绝
-        if (global.exactName && isSharedQrCustomerName(trimmed)) {
-            log.warn("客户「{}」精确命中共享扫码客户 {}（使用组织={}），当前账套组织={}，接受",
+        // 集团共享：精确全称（或去「华翔」字号后全称一致）命中即接受，不限使用组织
+        if (global.exactName || isGroupExactCustomerHit(trimmed, global)) {
+            log.warn("客户「{}」精确命中集团档案 {}（使用组织={}），当前账套组织={}，接受",
                     trimmed, global.number, defaultText(global.useOrgName, global.useOrg),
                     defaultText(useOrgNameHint, useOrgCode));
             return global.number;
         }
-        // 精确全称 + 同品牌组织（汾源/共成等）兜底
-        if (global.exactName && orgBrandCompatible(global.useOrgName, useOrgNameHint)) {
-            log.warn("客户「{}」精确命中 {}，使用组织「{}」与账套「{}」同品牌，接受（账簿组织编码配置={}）",
-                    trimmed, global.number, global.useOrgName, useOrgNameHint, useOrgCode);
-            return global.number;
-        }
-        log.warn("客户「{}」匹配到 {}（组织编码={} 组织名={}）但与目标组织编码={} 名称={} 不兼容，放弃",
+        log.warn("客户「{}」模糊匹配到 {}（组织编码={} 组织名={}）但与目标组织编码={} 名称={} 不兼容，放弃",
                 trimmed, global.number, global.useOrg, global.useOrgName, useOrgCode, useOrgNameHint);
         return null;
     }
@@ -1330,9 +1317,9 @@ public class KingdeeVoucherQueryService {
         CustomerHit global = findCustomerHitInternal(kingdeeUrl, sessionId, name, null, null);
         if (global == null) {
             StringBuilder msg = new StringBuilder();
-            msg.append("未在金蝶客户档案找到「").append(name).append("」");
+            msg.append("未在金蝶集团客户档案找到「").append(name).append("」");
             if (StringUtils.hasText(useOrgNameHint)) {
-                msg.append("（目标组织 ").append(useOrgNameHint.trim()).append("）");
+                msg.append("（当前账套 ").append(useOrgNameHint.trim()).append("，已按集团范围检索）");
             }
             // 购方带分公司/支公司时：若仅有总公司档案，明确提示不可顶替
             if (hasRegionalBranchSuffix(name)) {
@@ -1348,23 +1335,47 @@ public class KingdeeVoucherQueryService {
                     }
                 }
             }
-            msg.append("。请在金蝶按购方全称新建客户并分配到当前账套组织后重试");
+            msg.append("。请在金蝶按购方全称新建客户（集团内任意组织可用）后重试");
             return msg.toString();
         }
         if (customerOrgCompatible(global, useOrgCode, useOrgNameHint)
-                || (global.exactName && orgNameCompatible(global.useOrgName, useOrgNameHint))
-                || (global.exactName && isSharedQrCustomerName(name))) {
+                || global.exactName
+                || isGroupExactCustomerHit(name, global)
+                || isSharedQrCustomerName(name)) {
             // 理论上可匹配；仍走到这里说明上层逻辑有问题
             return "客户「" + defaultText(global.name, name) + "」编码 " + global.number
                     + " 已找到（使用组织 " + defaultText(global.useOrgName, global.useOrg) + "），"
                     + "但写入校验未通过，请重试或联系管理员";
         }
-        return "金蝶已有客户「" + defaultText(global.name, name) + "」编码 " + global.number
-                + "（使用组织 " + defaultText(global.useOrgName, defaultText(global.useOrg, "未知")) + "），"
-                + "与当前账套组织"
-                + (StringUtils.hasText(useOrgNameHint) ? "「" + useOrgNameHint + "」" : "")
-                + (StringUtils.hasText(useOrgCode) ? "/编码 " + useOrgCode : "")
-                + "不匹配。请确认客户列表筛选组织是否为汾源，或将该客户分配到汾源组织";
+        // 其它组织有近似名、当前组织可能有去字号近似名
+        CustomerHit localAlias = null;
+        if (StringUtils.hasText(useOrgCode) || StringUtils.hasText(useOrgNameHint)) {
+            localAlias = findCustomerHitInternal(kingdeeUrl, sessionId, name, useOrgCode, useOrgNameHint);
+        }
+        if (localAlias != null) {
+            return "金蝶已有客户「" + defaultText(global.name, name) + "」编码 " + global.number
+                    + "（使用组织 " + defaultText(global.useOrgName, defaultText(global.useOrg, "未知")) + "），"
+                    + "名称非精确全称；当前组织下已匹配到近似客户「"
+                    + defaultText(localAlias.name, "") + "」编码 " + localAlias.number
+                    + "。若反推仍失败请重试写入";
+        }
+        return "金蝶集团内未找到与「" + name + "」精确全称一致的客户；近似命中「"
+                + defaultText(global.name, name) + "」编码 " + global.number
+                + "（使用组织 " + defaultText(global.useOrgName, defaultText(global.useOrg, "未知")) + "）"
+                + "不能自动顶替。请按银行户名全称在金蝶新建客户后重试";
+    }
+
+    /** 集团级精确：全称一致，或去掉集团字号「华翔」后全称一致。 */
+    private boolean isGroupExactCustomerHit(String searchName, CustomerHit hit) {
+        if (hit == null || !StringUtils.hasText(searchName) || !StringUtils.hasText(hit.name)) {
+            return false;
+        }
+        if (searchName.trim().equals(hit.name.trim())) {
+            return true;
+        }
+        String a = stripGroupBrandToken(searchName);
+        String b = stripGroupBrandToken(hit.name);
+        return StringUtils.hasText(a) && a.length() >= 6 && a.equals(b);
     }
 
     private boolean customerOrgCompatible(CustomerHit hit, String useOrgCode, String useOrgNameHint) {
@@ -1568,6 +1579,17 @@ public class KingdeeVoucherQueryService {
         if (needle.equals(shortName)) {
             return 900;
         }
+        // 去掉集团字号「华翔」后全称一致（银行户名 vs 账套客户档案）
+        String needleNoBrand = stripGroupBrandToken(needle);
+        String nameNoBrand = stripGroupBrandToken(name);
+        if (StringUtils.hasText(needleNoBrand) && needleNoBrand.equals(nameNoBrand)
+                && needleNoBrand.length() >= 6) {
+            return 950;
+        }
+        if (StringUtils.hasText(needleNoBrand) && needleNoBrand.equals(shortName)
+                && needleNoBrand.length() >= 6) {
+            return 880;
+        }
         // 检索名带分公司/支公司：禁止用更短的总公司名得分（避免成都支公司→总公司 CUST）
         if (hasRegionalBranchSuffix(needle) && isParentCompanyOfBranch(needle, name)) {
             return 0;
@@ -1595,6 +1617,14 @@ public class KingdeeVoucherQueryService {
             return 200;
         }
         return 0;
+    }
+
+    /** 去掉银行户名里常见的集团字号，便于与账套客户简称对齐。 */
+    static String stripGroupBrandToken(String name) {
+        if (!StringUtils.hasText(name)) {
+            return name;
+        }
+        return name.trim().replace("华翔", "").replace("  ", " ").trim();
     }
 
     /** 是否含分公司 / 中心支公司 / 支公司 / 营业部等区域分支后缀。 */
@@ -1669,24 +1699,44 @@ public class KingdeeVoucherQueryService {
         if (hasRegionalBranchSuffix(name)) {
             return out;
         }
+        // 银行户名常带集团字号「华翔」，汾源等账套客户档案可能不带（临汾华翔恒泰→临汾恒泰）
+        if (name.contains("华翔")) {
+            String noBrand = name.replace("华翔", "").replace("  ", " ").trim();
+            if (!noBrand.isEmpty() && !out.contains(noBrand)) {
+                out.add(noBrand);
+            }
+        }
         String stripped = name
                 .replace("股份有限公司", "")
                 .replace("有限责任公司", "")
                 .replace("有限公司", "")
                 .trim();
-        if (!stripped.isEmpty() && !stripped.equals(name)) {
+        if (!stripped.isEmpty() && !stripped.equals(name) && !out.contains(stripped)) {
             out.add(stripped);
         }
+        if (stripped.contains("华翔")) {
+            String strippedNoBrand = stripped.replace("华翔", "").replace("  ", " ").trim();
+            if (!strippedNoBrand.isEmpty() && !out.contains(strippedNoBrand)) {
+                out.add(strippedNoBrand);
+            }
+        }
         // 再截到常见企业主体（保留前 8～12 个汉字量级的核心名）
-        if (stripped.length() > 6) {
-            String core = stripped.length() > 12 ? stripped.substring(0, 12) : stripped;
-            if (!out.contains(core)) {
-                out.add(core);
+        for (String base : new ArrayList<>(out)) {
+            String coreBase = base
+                    .replace("股份有限公司", "")
+                    .replace("有限责任公司", "")
+                    .replace("有限公司", "")
+                    .trim();
+            if (coreBase.length() > 6) {
+                String core = coreBase.length() > 12 ? coreBase.substring(0, 12) : coreBase;
+                if (!out.contains(core)) {
+                    out.add(core);
+                }
             }
-            if (stripped.contains("平安")) {
-                out.add("平安财产保险");
-                out.add("中国平安");
-            }
+        }
+        if (stripped.contains("平安")) {
+            out.add("平安财产保险");
+            out.add("中国平安");
         }
         return out;
     }

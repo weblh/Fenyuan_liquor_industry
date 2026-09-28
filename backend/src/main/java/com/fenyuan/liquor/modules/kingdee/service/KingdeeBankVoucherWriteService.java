@@ -284,7 +284,7 @@ public class KingdeeBankVoucherWriteService {
                                String orgCompanyCode) {
         BigDecimal amount = requireDebit(detail);
         String name = requireCounterparty(detail);
-        // 供应商按「使用组织」查，不是账簿编码（002≠110）
+        // 供应商按集团档案搜索（财务确认不限汾源使用组织）；仍传入组织供非精确时优先本地
         String useOrgCode = StringUtils.hasText(account.getUseOrgCode())
                 ? account.getUseOrgCode().trim()
                 : null;
@@ -388,9 +388,11 @@ public class KingdeeBankVoucherWriteService {
             boolean feeExempt = channelService.isQrFeeExempt(channel);
             BigDecimal feeFromSummary = BankVoucherFeeAmounts.parseFeeFromText(
                     detail.getSummary(), detail.getRemark(), detail.getPurpose());
-            // 农商行等免手续费渠道：借银行存款 / 贷扫码收款，不按费率反推；仅当摘要显式含 FEE 时才拆
+            // 农商行等免手续费渠道：默认不按费率反推；Excel/摘要带 FEE 或收款金额时仍拆红字手续费
             BigDecimal feeRate = feeExempt ? BigDecimal.ZERO : parseQrFeeRate();
-            if (feeExempt && feeFromSummary == null) {
+            if (feeExempt && feeFromSummary == null
+                    && BankVoucherFeeAmounts.parseGrossFromText(
+                    detail.getPurpose(), detail.getRemark(), detail.getSummary()) == null) {
                 log.info("扫码收款免手续费（渠道） serial={} 到账={}",
                         defaultText(detail.getTradeSerialNo(), String.valueOf(detail.getId())),
                         bankAmount.toPlainString());
@@ -401,17 +403,20 @@ public class KingdeeBankVoucherWriteService {
                         feeRate);
                 BigDecimal fee = BankVoucherFeeAmounts.resolveQrFeeAmount(bankAmount, gross);
                 if (fee.compareTo(BigDecimal.ZERO) > 0) {
-                    log.info("扫码收款拆分手续费 serial={} 到账={} FEE摘要={} 实付={} feeExempt={}",
+                    log.info("扫码收款拆分手续费(红字借银行) serial={} 到账={} FEE={} 实付={} feeExempt={}",
                             defaultText(detail.getTradeSerialNo(), String.valueOf(detail.getId())),
                             bankAmount.toPlainString(),
                             feeFromSummary != null ? feeFromSummary.toPlainString() : fee.toPlainString(),
                             gross.toPlainString(),
                             feeExempt);
-                    entity.add(buildDebitEntry(explanation, bankAccountOf(detail), bankAmount,
+                    // 四行：借银行(实付) / 贷应收(实付) / 借手续费 / 借银行(手续费红字，负数)
+                    entity.add(buildDebitEntry(explanation, bankAccountOf(detail), gross,
                             properties.getBankDimensionKey(), bankDimensionOf(detail)));
-                    entity.add(buildFeeMarkerEntry(explanation + "手续费", properties.getFeeAccount(), fee));
                     entity.add(buildCreditEntry(explanation, properties.getReceivableAccount(), gross,
                             properties.getCustomerDimensionKey(), customerNo));
+                    entity.add(buildFeeMarkerEntry(explanation + "手续费", properties.getFeeAccount(), fee));
+                    entity.add(buildDebitEntry(explanation + "手续费", bankAccountOf(detail), fee.negate(),
+                            properties.getBankDimensionKey(), bankDimensionOf(detail)));
                     return;
                 }
             }

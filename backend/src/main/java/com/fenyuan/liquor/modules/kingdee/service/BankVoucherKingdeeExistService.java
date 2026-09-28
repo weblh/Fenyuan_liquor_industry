@@ -174,12 +174,33 @@ public class BankVoucherKingdeeExistService {
                     matchedAmount = amount;
                 }
             }
+            BigDecimal feeOnHit = BankVoucherFeeAmounts.parseFeeFromText(
+                    detail.getSummary(), detail.getRemark(), detail.getPurpose());
+            // 扫码带手续费时，旧的两行凭证（只有到账净额）不算写完，必须有红字借方
+            if (hit != null && qr && feeOnHit != null && feeOnHit.compareTo(BigDecimal.ZERO) > 0
+                    && !voucherHasRedBankDebit(allEntries, hit, feeOnHit)) {
+                String word = defaultText(hit.getFbillTypeID(), properties.getVoucherGroup());
+                String no = defaultText(hit.getFvoucherNo(), "");
+                item.setKingdeeExistStatus(2);
+                item.setMessage("金蝶 " + word + "-" + no
+                        + " 未包含红字借方手续费 " + feeOnHit.toPlainString()
+                        + "。请先删除该银字凭证，再重新写入");
+                detail.setKingdeeExistStatus(2);
+                detail.setKingdeeExistVoucherWord(null);
+                detail.setKingdeeExistVoucherNo(null);
+                detail.setKingdeeExistCheckedAt(LocalDateTime.now());
+                clearPlatformWriteMark(detail);
+                detail.setUpdateTime(LocalDateTime.now());
+                detailMapper.updateById(detail);
+                result.setNotExistsCount(result.getNotExistsCount() + 1);
+                result.getItems().add(item);
+                continue;
+            }
             if (hit != null) {
                 String word = defaultText(hit.getFbillTypeID(), properties.getVoucherGroup());
                 String no = defaultText(hit.getFvoucherNo(), "");
                 String hitDate = defaultText(normalizeDateDigits(hit.getFdate()), "");
-                BigDecimal fee = BankVoucherFeeAmounts.parseFeeFromText(
-                        detail.getSummary(), detail.getRemark(), detail.getPurpose());
+                BigDecimal fee = feeOnHit;
                 String feeHint = (qr && fee != null)
                         ? "，摘要FEE=" + fee.toPlainString()
                         + "，核对金额=" + matchedAmount.toPlainString()
@@ -642,6 +663,38 @@ public class BankVoucherKingdeeExistService {
      * 查重命中后同步为「已写入」，写入状态展示银字号，前端禁止再勾选。
      * 若本平台曾真实写入（非 EXIST- 占位），保留原凭证 ID。
      */
+    /** 同一张银字上，银行存款借方是否已有手续费红字（负数）。 */
+    private boolean voucherHasRedBankDebit(List<VoucherDetailVO> all, VoucherDetailVO hit, BigDecimal fee) {
+        if (hit == null || fee == null || all == null) {
+            return false;
+        }
+        String word = defaultText(hit.getFbillTypeID(), "");
+        String no = defaultText(hit.getFvoucherNo(), "");
+        String date = normalizeDateDigits(hit.getFdate());
+        BigDecimal red = fee.negate().setScale(2, RoundingMode.HALF_UP);
+        for (VoucherDetailVO e : all) {
+            if (!word.equals(defaultText(e.getFbillTypeID(), ""))) {
+                continue;
+            }
+            if (!no.equals(defaultText(e.getFvoucherNo(), ""))) {
+                continue;
+            }
+            String rowDate = normalizeDateDigits(e.getFdate());
+            if (StringUtils.hasText(date) && StringUtils.hasText(rowDate) && !date.equals(rowDate)) {
+                continue;
+            }
+            String account = e.getFaccountID() == null ? "" : e.getFaccountID().trim();
+            if (!account.startsWith("1002.")) {
+                continue;
+            }
+            BigDecimal debit = scale(e.getFdebit());
+            if (debit != null && debit.compareTo(red) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void markExistAsWritten(KingdeeBankVoucherDetail detail, String word, String no) {
         detail.setWriteStatus(1);
         detail.setKingdeeVoucherWord(defaultText(word, properties.getVoucherGroup()));
