@@ -3,6 +3,7 @@ import AuthGuard from './permission'
 import MainLayout from '@/components/Layout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
+import SubDashboard from '@/pages/SubDashboard'
 import UserPage from '@/pages/System/User'
 import RolePage from '@/pages/System/Role'
 import MenuPage from '@/pages/System/Menu'
@@ -24,6 +25,7 @@ import KingdeeVoucherPage from '@/pages/Finance/KingdeeVoucher'
 import KingdeeCredentialPage from '@/pages/Kingdee/Credential'
 import KingdeeAccountSetPage from '@/pages/Kingdee/AccountSet'
 import BankVoucherPage from '@/pages/Kingdee/BankVoucher'
+import SettingsPage from '@/pages/Settings'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
 
@@ -43,6 +45,7 @@ const router = createBrowserRouter(
       children: [
         { index: true, element: <Navigate to="/dashboard" replace /> },
         { path: 'dashboard', element: <Dashboard /> },
+        { path: 'sub-dashboard', element: <SubDashboard /> },
         { path: 'system/user', element: <UserPage /> },
         { path: 'system/role', element: <RolePage /> },
         { path: 'system/menu', element: <MenuPage /> },
@@ -65,6 +68,7 @@ const router = createBrowserRouter(
         { path: 'kingdee/credential', element: <KingdeeCredentialPage /> },
         { path: 'kingdee/account-set', element: <KingdeeAccountSetPage /> },
         { path: 'kingdee/bank-voucher', element: <BankVoucherPage /> },
+        { path: 'settings', element: <SettingsPage /> },
       ],
     },
     {

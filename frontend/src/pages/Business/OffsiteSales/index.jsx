@@ -69,6 +69,11 @@ export default function OffsiteSalesPage() {
     () => ({
       tooltip: {
         trigger: 'item',
+        backgroundColor: 'rgba(13, 26, 48, 0.96)',
+        borderColor: 'rgba(90, 165, 255, 0.35)',
+        borderWidth: 1,
+        textStyle: { color: '#e8f0fc', fontSize: 13 },
+        extraCssText: 'box-shadow: none; border-radius: 6px;',
         formatter: (p) => `${p.name}<br/>异地销量：${p.value || 0}`,
       },
       visualMap: {
@@ -77,7 +82,8 @@ export default function OffsiteSalesPage() {
         left: 16,
         bottom: 16,
         text: ['高', '低'],
-        inRange: { color: ['#f7e8d3', '#c9a227', '#8b1a1a'] },
+        textStyle: { color: '#9db2d0', fontSize: 12 },
+        inRange: { color: ['#0e2a4d', '#2f80ed', '#3dd6f2'] },
         calculable: true,
       },
       series: [
@@ -86,9 +92,14 @@ export default function OffsiteSalesPage() {
           map: 'china',
           roam: true,
           label: { show: false },
+          itemStyle: {
+            areaColor: '#162849',
+            borderColor: 'rgba(90, 165, 255, 0.35)',
+            borderWidth: 0.7,
+          },
           emphasis: {
-            label: { show: true, color: '#1f1a17' },
-            itemStyle: { areaColor: '#e8c56a' },
+            label: { show: true, color: '#ffffff', fontWeight: 600 },
+            itemStyle: { areaColor: '#3dd6f2' },
           },
           data: provinceAgg,
         },

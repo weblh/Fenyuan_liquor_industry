@@ -1,3 +1,15 @@
 .wrap {
   padding: 8px 16px 0;
 }
+
+.wrap :global(.ant-breadcrumb) {
+  color: #7d92b5;
+}
+
+.wrap :global(.ant-breadcrumb a) {
+  color: #5aa5ff !important;
+}
+
+.wrap :global(.ant-breadcrumb-separator) {
+  color: #4a6080;
+}

@@ -5,7 +5,8 @@
   padding: 0 16px;
   height: 56px;
   line-height: 56px;
-  border-bottom: 1px solid #f0f0f0;
+  background: #0d1a30 !important;
+  border-bottom: 1px solid rgba(90, 165, 255, 0.15);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -22,21 +23,27 @@
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
+  color: #e8f0fc;
   transition: background 0.2s;
 }
 
 .trigger:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(90, 165, 255, 0.12);
 }
 
 .title {
   font-size: 16px;
   font-weight: 600;
-  color: #8b1a1a;
+  color: #5aa5ff;
   letter-spacing: 0.5px;
 }
 
 .user {
   cursor: pointer;
   padding: 0 8px;
+  color: #e8f0fc;
+}
+
+.user :global(.ant-avatar) {
+  background: rgba(47, 128, 237, 0.3);
 }

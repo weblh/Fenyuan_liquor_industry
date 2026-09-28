@@ -1,6 +1,23 @@
 .sider {
   min-height: 100vh;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  background: #0b1729 !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.35);
+}
+
+.sider :global(.ant-layout-sider-children) {
+  background: #0b1729;
+}
+
+.sider :global(.ant-menu-dark) {
+  background: transparent;
+}
+
+.sider :global(.ant-menu-dark .ant-menu-item-selected) {
+  background: rgba(47, 128, 237, 0.25);
+}
+
+.sider :global(.ant-menu-dark .ant-menu-sub) {
+  background: rgba(7, 14, 26, 0.6);
 }
 
 .logo {
@@ -9,7 +26,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(90, 165, 255, 0.15);
   overflow: hidden;
   white-space: nowrap;
 }
@@ -21,15 +38,16 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #8b1a1a;
-  color: #f5e6c8;
+  background: linear-gradient(135deg, #2f80ed, #1a5fb8);
+  color: #e8f0fc;
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(47, 128, 237, 0.4);
 }
 
 .logoText {
-  color: #fff;
+  color: #e8f0fc;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;

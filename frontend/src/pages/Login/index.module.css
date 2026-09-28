@@ -4,9 +4,9 @@
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(135deg, rgba(139, 26, 26, 0.85), rgba(60, 20, 20, 0.9)),
-    radial-gradient(ellipse at 20% 20%, #c45c26 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, #8b1a1a 0%, #1a0a0a 70%);
+    radial-gradient(ellipse at 20% 20%, rgba(47, 128, 237, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
+    linear-gradient(150deg, #0b1729 0%, #070e1a 100%);
   position: relative;
   overflow: hidden;
 }
@@ -18,8 +18,8 @@
     -45deg,
     transparent,
     transparent 12px,
-    rgba(255, 255, 255, 0.02) 12px,
-    rgba(255, 255, 255, 0.02) 24px
+    rgba(90, 165, 255, 0.02) 12px,
+    rgba(90, 165, 255, 0.02) 24px
   );
   pointer-events: none;
 }
@@ -28,9 +28,37 @@
   width: 400px;
   max-width: calc(100vw - 32px);
   border-radius: 12px !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35) !important;
+  background: rgba(13, 26, 48, 0.96) !important;
+  border: 1px solid rgba(90, 165, 255, 0.25) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(90, 165, 255, 0.08) !important;
   position: relative;
   z-index: 1;
+}
+
+.card :global(.ant-input-affix-wrapper) {
+  background: rgba(7, 14, 26, 0.6) !important;
+  border-color: rgba(90, 165, 255, 0.2) !important;
+}
+
+.card :global(.ant-input-affix-wrapper:hover),
+.card :global(.ant-input-affix-wrapper-focused) {
+  border-color: rgba(90, 165, 255, 0.5) !important;
+}
+
+.card :global(.ant-input) {
+  color: #e8f0fc !important;
+}
+
+.card :global(.ant-input::placeholder) {
+  color: rgba(125, 146, 181, 0.6) !important;
+}
+
+.card :global(.ant-input-password-icon) {
+  color: rgba(125, 146, 181, 0.8) !important;
+}
+
+.card :global(.ant-form-item-explain-error) {
+  color: #ff7a7a !important;
 }
 
 .brand {
@@ -43,25 +71,26 @@
   height: 48px;
   margin: 0 auto 12px;
   border-radius: 10px;
-  background: #8b1a1a;
-  color: #f5e6c8;
+  background: linear-gradient(135deg, #2f80ed, #1a5fb8);
+  color: #e8f0fc;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   font-weight: 700;
+  box-shadow: 0 4px 16px rgba(47, 128, 237, 0.4);
 }
 
 .title {
   margin: 0;
   font-size: 22px;
-  color: #8b1a1a;
+  color: #5aa5ff;
   letter-spacing: 2px;
 }
 
 .sub {
   margin: 8px 0 0;
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(125, 146, 181, 0.7);
   font-size: 13px;
 }
 
@@ -78,14 +107,14 @@
 .captchaImg {
   width: 110px;
   height: 40px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid rgba(90, 165, 255, 0.2);
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fafafa;
+  background: rgba(7, 14, 26, 0.6);
   flex-shrink: 0;
 }
 
@@ -97,11 +126,19 @@
 
 .captchaTip {
   font-size: 12px;
-  color: #999;
+  color: #7d92b5;
 }
 
 .btn {
-  background: #8b1a1a !important;
-  border-color: #8b1a1a !important;
+  background: linear-gradient(135deg, #2f80ed, #1a5fb8) !important;
+  border-color: transparent !important;
   height: 42px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  box-shadow: 0 4px 16px rgba(47, 128, 237, 0.35);
+}
+
+.btn:hover {
+  background: linear-gradient(135deg, #4a9fff, #2f80ed) !important;
+  box-shadow: 0 6px 20px rgba(47, 128, 237, 0.5);
 }
