@@ -1,4 +1,4 @@
-import { Layout, Dropdown, Space, Avatar } from 'antd'
+import { Layout, Dropdown, Space, Avatar, theme } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -20,6 +20,7 @@ export default function Header() {
   const collapsed = useSelector((s) => s.app.collapsed)
   const title = useSelector((s) => s.app.title)
   const userInfo = useSelector((s) => s.user.userInfo)
+  const { token } = theme.useToken()
 
   const onLogout = async () => {
     await dispatch(logout())
@@ -41,6 +42,7 @@ export default function Header() {
   return (
     <AntHeader
       className={styles.header}
+      style={{ background: token.colorBgContainer }}
     >
       <div className={styles.left}>
         <span className={styles.trigger} onClick={() => dispatch(toggleCollapsed())}>

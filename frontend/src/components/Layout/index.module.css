@@ -4,7 +4,7 @@
 
 .main {
   min-height: 100vh;
-  background: #0b1729;
+  background: #f0f2f5;
 }
 
 .content {
@@ -13,10 +13,9 @@
 }
 
 .panel {
-  background: linear-gradient(180deg, rgba(20, 37, 66, 0.95), rgba(13, 26, 48, 0.96));
-  border: 1px solid rgba(90, 165, 255, 0.12);
+  background: #fff;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 6px;
   min-height: 360px;
 }
 

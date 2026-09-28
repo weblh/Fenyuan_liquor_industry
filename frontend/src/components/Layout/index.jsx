@@ -36,7 +36,6 @@ const ROUTE_TITLES = {
   '/kingdee/credential': '账号密码',
   '/kingdee/account-set': '账套',
   '/kingdee/bank-voucher': '银行流水凭证',
-  '/settings': '设置',
 }
 
 export default function MainLayout() {
@@ -57,15 +56,9 @@ export default function MainLayout() {
       <Layout className={styles.main}>
         <Header />
         <TagsView />
-        {location.pathname !== '/sub-dashboard' && <BreadcrumbNav />}
+        <BreadcrumbNav />
         <Content className={styles.content}>
-          <div
-            className={
-              location.pathname === '/dashboard' || location.pathname === '/sub-dashboard'
-                ? styles.panelFlush
-                : styles.panel
-            }
-          >
+          <div className={location.pathname === '/dashboard' ? styles.panelFlush : styles.panel}>
             <Outlet />
           </div>
         </Content>

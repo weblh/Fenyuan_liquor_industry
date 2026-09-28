@@ -17,7 +17,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/Fenyuan_liquor_industry/api': {
-        target: 'https://www.zszy.cc/Fenyuan_liquor_industry',
+        target: 'http://localhost:6001',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/Fenyuan_liquor_industry\/api/, '/api'),
       },

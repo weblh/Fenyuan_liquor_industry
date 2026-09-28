@@ -6,7 +6,6 @@ import Permission from '@/components/Permission'
 /**
  * 通用业务 CRUD 列表页
  * fields: [{ name, label, type: 'text'|'number'|'textarea'|'select', required, options, search, table, width, render }]
- * className: 额外挂到根容器和 Table 上的自定义类名（用于页面级样式穿透）
  */
 export default function BizCrudPage({
   title,
@@ -16,8 +15,6 @@ export default function BizCrudPage({
   rowKey = 'id',
   toolbarExtra,
   onReady,
-  className,
-  tableClassName,
 }) {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState([])
@@ -142,7 +139,7 @@ export default function BizCrudPage({
   ]
 
   return (
-    <div className={className || ''}>
+    <div>
       <Form
         form={searchForm}
         layout="inline"
@@ -189,7 +186,6 @@ export default function BizCrudPage({
 
       <Table
         rowKey={rowKey}
-        className={tableClassName}
         loading={loading}
         columns={columns}
         dataSource={data}
