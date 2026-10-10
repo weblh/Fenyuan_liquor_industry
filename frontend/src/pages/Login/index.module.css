@@ -4,9 +4,9 @@
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(135deg, rgba(139, 26, 26, 0.85), rgba(60, 20, 20, 0.9)),
-    radial-gradient(ellipse at 20% 20%, #c45c26 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, #8b1a1a 0%, #1a0a0a 70%);
+    linear-gradient(135deg, rgba(12, 24, 48, 0.92), rgba(6, 12, 26, 0.96)),
+    radial-gradient(ellipse at 20% 20%, #1d4e89 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, #2f7cf6 0%, #060d1c 70%);
   position: relative;
   overflow: hidden;
 }
@@ -18,8 +18,8 @@
     -45deg,
     transparent,
     transparent 12px,
-    rgba(255, 255, 255, 0.02) 12px,
-    rgba(255, 255, 255, 0.02) 24px
+    rgba(120, 170, 255, 0.03) 12px,
+    rgba(120, 170, 255, 0.03) 24px
   );
   pointer-events: none;
 }
@@ -28,7 +28,9 @@
   width: 400px;
   max-width: calc(100vw - 32px);
   border-radius: 12px !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35) !important;
+  background: rgba(15, 24, 48, 0.92) !important;
+  border: 1px solid rgba(80, 130, 210, 0.22) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55) !important;
   position: relative;
   z-index: 1;
 }
@@ -43,25 +45,26 @@
   height: 48px;
   margin: 0 auto 12px;
   border-radius: 10px;
-  background: #8b1a1a;
-  color: #f5e6c8;
+  background: linear-gradient(135deg, #2f7cf6, #1d4e89);
+  color: #e8f1ff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   font-weight: 700;
+  box-shadow: 0 6px 18px rgba(47, 124, 246, 0.35);
 }
 
 .title {
   margin: 0;
   font-size: 22px;
-  color: #8b1a1a;
+  color: #cfe2ff;
   letter-spacing: 2px;
 }
 
 .sub {
   margin: 8px 0 0;
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(160, 185, 220, 0.65);
   font-size: 13px;
 }
 
@@ -78,14 +81,14 @@
 .captchaImg {
   width: 110px;
   height: 40px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #223355;
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fafafa;
+  background: #0a1224;
   flex-shrink: 0;
 }
 
@@ -97,11 +100,18 @@
 
 .captchaTip {
   font-size: 12px;
-  color: #999;
+  color: #6f83a0;
 }
 
 .btn {
-  background: #8b1a1a !important;
-  border-color: #8b1a1a !important;
+  background: linear-gradient(135deg, #2f7cf6, #1d5fc4) !important;
+  border-color: #2f7cf6 !important;
   height: 42px;
+  font-weight: 600;
+  letter-spacing: 4px;
+}
+
+.btn:hover {
+  background: linear-gradient(135deg, #4d8ff8, #2f7cf6) !important;
+  border-color: #4d8ff8 !important;
 }

@@ -263,31 +263,42 @@ export default function Dashboard() {
       return m ? `${Number(m[1])}月` : p
     }
     return {
-      color: ['#8b1a1a', '#c9a227'],
-      tooltip: { trigger: 'axis', textStyle: { fontSize: 13 } },
+      color: ['#2f7cf6', '#7db4ff'],
+      tooltip: {
+        trigger: 'axis',
+        appendToBody: true,
+        confine: true,
+        textStyle: { fontSize: 11, color: '#e0e6ed' },
+        padding: [1, 6],
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText:
+          'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;line-height:13px;height:auto;',
+      },
       legend: {
         data: channels.map((c) => `${c}销售额`),
         top: 0,
         right: 0,
         itemWidth: 14,
         itemHeight: 10,
-        textStyle: { color: '#595959', fontSize: 13 },
+        textStyle: { color: '#9fb2cc', fontSize: 13 },
       },
       grid: { left: 52, right: 14, top: 34, bottom: 26 },
       xAxis: {
         type: 'category',
         data: periods.map(monthLabel),
-        axisLine: { lineStyle: { color: '#d9d9d9' } },
-        axisLabel: { color: '#8c8c8c', fontSize: 13 },
+        axisLine: { lineStyle: { color: '#223355' } },
+        axisLabel: { color: '#9fb2cc', fontSize: 13 },
       },
       yAxis: {
         type: 'value',
         axisLabel: {
-          color: '#8c8c8c',
+          color: '#9fb2cc',
           fontSize: 13,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(80,120,180,0.18)' } },
       },
       series: channels.map((channel, idx) => ({
         name: `${channel}销售额`,
@@ -299,7 +310,7 @@ export default function Dashboard() {
         label: {
           show: true,
           position: 'top',
-          color: idx === 0 ? '#8b1a1a' : '#8a7020',
+          color: idx === 0 ? '#7db4ff' : '#cfe2ff',
           fontSize: 11,
           fontWeight: 600,
           formatter: (p) => (p.value ? MONEY(p.value) : ''),
@@ -318,10 +329,18 @@ export default function Dashboard() {
     })
     const chartData = Object.entries(seriesMap).map(([name, value]) => ({ name, value }))
     return {
-      color: ['#8b1a1a', '#c9a227', '#6b8f71', '#4a6fa5', '#a0522d', '#7a5c4e'],
+      color: ['#2f7cf6', '#c9a227', '#4d8ff8', '#7db4ff', '#6fb3d8', '#8ab8ee'],
       tooltip: {
         trigger: 'item',
-        textStyle: { fontSize: 13 },
+        appendToBody: true,
+        confine: true,
+        textStyle: { fontSize: 11, color: '#e0e6ed' },
+        padding: [1, 6],
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText:
+          'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;line-height:13px;height:auto;',
         formatter: (p) => `${p.name}<br/>销量 Qty：${p.value} 箱<br/>占比 Share：${p.percent}%`,
       },
       legend: {
@@ -330,7 +349,7 @@ export default function Dashboard() {
         top: 'middle',
         itemWidth: 12,
         itemHeight: 10,
-        textStyle: { color: '#595959', fontSize: 12 },
+        textStyle: { color: '#9fb2cc', fontSize: 12 },
       },
       series: [
         {
@@ -338,7 +357,7 @@ export default function Dashboard() {
           radius: ['38%', '64%'],
           center: ['36%', '52%'],
           avoidLabelOverlap: true,
-          itemStyle: { borderRadius: 3, borderColor: '#fff', borderWidth: 1 },
+          itemStyle: { borderRadius: 3, borderColor: '#0f1830', borderWidth: 1 },
           label: { show: false },
           data: chartData,
         },
@@ -349,9 +368,18 @@ export default function Dashboard() {
   const rankOption = useMemo(() => {
     const list = [...(data.salesRank || [])].slice(0, 8).reverse()
     return {
-      color: ['#8b1a1a'],
+      color: ['#2f7cf6'],
       tooltip: {
         trigger: 'axis',
+        appendToBody: true,
+        confine: true,
+        textStyle: { fontSize: 11, color: '#e0e6ed' },
+        padding: [1, 6],
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText:
+          'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;line-height:13px;height:auto;',
         axisPointer: { type: 'shadow' },
         formatter: (params) => {
           const p = params?.[0]
@@ -363,16 +391,16 @@ export default function Dashboard() {
       xAxis: {
         type: 'value',
         axisLabel: {
-          color: '#8c8c8c',
+          color: '#9fb2cc',
           fontSize: 12,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(80,120,180,0.18)' } },
       },
       yAxis: {
         type: 'category',
         data: list.map((i) => i.companyName),
-        axisLabel: { color: '#595959', width: 84, overflow: 'truncate', fontSize: 13 },
+        axisLabel: { color: '#9fb2cc', width: 84, overflow: 'truncate', fontSize: 13 },
         axisLine: { show: false },
         axisTick: { show: false },
       },
@@ -385,7 +413,7 @@ export default function Dashboard() {
           label: {
             show: true,
             position: 'right',
-            color: '#8c8c8c',
+            color: '#9fb2cc',
             fontSize: 12,
             formatter: (p) => MONEY(p.value),
           },
@@ -394,10 +422,25 @@ export default function Dashboard() {
     }
   }, [data.salesRank])
 
+  const PROVINCE_FULL_NAMES = {
+    北京: '北京市', 天津: '天津市', 上海: '上海市', 重庆: '重庆市',
+    内蒙古: '内蒙古自治区', 广西: '广西壮族自治区', 西藏: '西藏自治区',
+    宁夏: '宁夏回族自治区', 新疆: '新疆维吾尔自治区',
+    香港: '香港特别行政区', 澳门: '澳门特别行政区',
+  }
+  const normalizeProvinceName = (raw) => {
+    const name = (raw || '').trim()
+    if (!name) return ''
+    if (/省|市|自治区|特别行政区/.test(name)) return name
+    if (PROVINCE_FULL_NAMES[name]) return PROVINCE_FULL_NAMES[name]
+    return `${name}省`
+  }
+
   const offsiteProvinceAgg = useMemo(() => {
     const map = {}
     ;(data.offsiteSales || []).forEach((r) => {
-      const province = (r.province || '').replace(/省|市|自治区|壮族|回族|维吾尔/g, '') || '未知'
+      const province = normalizeProvinceName(r.province)
+      if (!province) return
       map[province] = (map[province] || 0) + Number(r.quantity || 0)
     })
     return Object.entries(map)
@@ -414,16 +457,28 @@ export default function Dashboard() {
     () => ({
       tooltip: {
         trigger: 'item',
-        formatter: (p) => `${p.name}<br/>异地销量：${Number(p.value || 0).toLocaleString('zh-CN')}`,
+        appendToBody: true,
+        confine: true,
+        textStyle: { fontSize: 11, color: '#e0e6ed' },
+        padding: [1, 6],
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText:
+          'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;line-height:13px;height:auto;',
+        formatter: (p) => {
+          if (!p.data?.realValue) return ''
+          return `${p.name}<br/>异地销量：${Number(p.data.realValue).toLocaleString('zh-CN')}`
+        },
       },
       visualMap: {
         min: 0,
-        max: Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0),
+        max: Math.sqrt(Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0)),
         left: 2,
         bottom: 4,
         text: ['高 High', '低 Low'],
-        textStyle: { color: '#6b625a', fontSize: 12 },
-        inRange: { color: ['#f7e8d3', '#d4a84b', '#8b1a1a'] },
+        textStyle: { color: '#7a8ba0', fontSize: 12 },
+        inRange: { color: ['#1a3a5e', '#3a7ab0', '#6fb3d8', '#2f7cf6'] },
         calculable: false,
         itemWidth: 10,
         itemHeight: 72,
@@ -432,31 +487,29 @@ export default function Dashboard() {
         {
           type: 'map',
           map: 'china',
-          roam: false,
+          roam: true,
           zoom: 1.05,
-          layoutCenter: ['54%', '50%'],
-          layoutSize: '92%',
+          scaleLimit: { min: 0.8, max: 3 },
+          layoutCenter: ['50%', '50%'],
+          layoutSize: '98%',
           aspectScale: 0.82,
           itemStyle: {
-            areaColor: '#f3ece0',
-            borderColor: '#d9cbb6',
+            areaColor: '#0d1830',
+            borderColor: 'rgba(100, 160, 230, 0.2)',
             borderWidth: 0.7,
           },
           label: {
-            show: true,
-            color: '#4a433c',
-            fontSize: 11,
-            formatter: (p) => {
-              // 南海诸岛等小区域不标，避免挤成一团
-              if (!p.name || p.name.includes('南海') || p.name.includes('九段')) return ''
-              return p.name
-            },
+            show: false,
           },
           emphasis: {
-            label: { show: true, color: '#1f1a17', fontWeight: 600, fontSize: 13 },
-            itemStyle: { areaColor: '#e8c56a' },
+            label: { show: true, color: '#e8f1ff', fontWeight: 600, fontSize: 12 },
+            itemStyle: { areaColor: '#4d8ff8' },
           },
-          data: offsiteProvinceAgg,
+          data: offsiteProvinceAgg.map((i) => ({
+            name: i.name,
+            value: Math.sqrt(i.value),
+            realValue: i.value,
+          })),
         },
       ],
     }),
@@ -708,7 +761,9 @@ export default function Dashboard() {
                             <span className={`${styles.mapRankNo} ${idx < 3 ? styles.mapRankTop : ''}`}>
                               {idx + 1}
                             </span>
-                            <span className={styles.mapRankName}>{item.name}</span>
+                            <span className={styles.mapRankName}>
+                              {item.name.replace(/省|市|自治区|壮族|回族|维吾尔|特别行政区/g, '')}
+                            </span>
                             <span className={styles.mapRankBarWrap}>
                               <span
                                 className={styles.mapRankBar}

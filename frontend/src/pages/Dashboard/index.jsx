@@ -1,23 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Empty, Space, Spin, Table, Tooltip, message } from 'antd'
+import { Button, Empty, Spin, Table, message } from 'antd'
 import {
-  AlertOutlined,
   CompressOutlined,
-  DatabaseOutlined,
-  EnvironmentOutlined,
   ExpandOutlined,
-  FundOutlined,
-  MoneyCollectOutlined,
   ReloadOutlined,
-  ShoppingCartOutlined,
-  SolutionOutlined,
-  TrophyOutlined,
 } from '@ant-design/icons'
 import ReactECharts from 'echarts-for-react'
 import * as echarts from 'echarts'
 import { useSelector } from 'react-redux'
 import { getDashboardOverview } from '@/api'
+import { priceCompareApi } from '@/api/modules/business'
 import styles from './index.module.css'
 
 const MONEY = (v) => {
@@ -93,13 +86,29 @@ export default function Dashboard() {
   const [fullscreen, setFullscreen] = useState(false)
   const [chartKey, setChartKey] = useState(0)
   const [mapReady, setMapReady] = useState(false)
+  const [priceRows, setPriceRows] = useState([])
   const pageRef = useRef(null)
+  const mapChartRef = useRef(null)
+
+  // 地图无数据省份悬停时强制隐藏飘窗
+  const onMapEvents = useMemo(() => ({
+    mouseover: (params) => {
+      if (params?.seriesType === 'map' && (!params.value || Number(params.value) <= 0)) {
+        const inst = mapChartRef.current?.getEchartsInstance?.()
+        setTimeout(() => inst?.dispatchAction({ type: 'hideTip' }), 0)
+      }
+    },
+  }), [])
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getDashboardOverview()
+      const [res, priceRes] = await Promise.all([
+        getDashboardOverview(),
+        priceCompareApi.list().catch(() => []),
+      ])
       setData(res || EMPTY_DATA)
+      setPriceRows(Array.isArray(priceRes) ? priceRes : (priceRes?.records || []))
       setUpdatedAt(formatNow())
     } catch {
       setData(EMPTY_DATA)
@@ -158,97 +167,6 @@ export default function Dashboard() {
     }
   }
 
-  const summary = data.summary || {}
-
-  const kpiCards = [
-    {
-      key: 'retention',
-      label: '60天未复购',
-      labelEn: 'Inactive 60d',
-      value: summary.retentionAlertCount || 0,
-      tip: '超60天未复购客户，已推送主看板',
-      icon: <AlertOutlined />,
-      tone: 'crimson',
-      path: '/business/customer-maintain',
-      suffix: '家',
-      suffixEn: 'Clients',
-    },
-    {
-      key: 'price',
-      label: '价格对比',
-      labelEn: 'Price Compare',
-      value: '京东/天猫',
-      tip: '自动抓取平台价与销售价对比',
-      icon: <FundOutlined />,
-      tone: 'amber',
-      path: '/business/price-compare',
-    },
-    {
-      key: 'offsite',
-      label: '异地销量',
-      labelEn: 'Offsite Sales',
-      value: MONEY(summary.totalOffsiteQty),
-      tip: `覆盖 ${summary.offsiteProvinceCount || 0} 个省份`,
-      icon: <EnvironmentOutlined />,
-      tone: 'slate',
-      path: '/business/offsite-sales',
-    },
-    {
-      key: 'sale',
-      label: '在线销售额',
-      labelEn: 'Online Sales',
-      value: MONEY(summary.totalSaleAmount),
-      tip: 'ERP「美福」+「即时零售」(美团) 分列',
-      icon: <ShoppingCartOutlined />,
-      tone: 'wine',
-      path: '/business/online-sale',
-    },
-    {
-      key: 'payment',
-      label: '回款金额',
-      labelEn: 'Collections',
-      value: MONEY(summary.totalPaymentAmount),
-      tip: '各周期回款金额合计',
-      icon: <MoneyCollectOutlined />,
-      tone: 'amber',
-      path: '/business/online-sale',
-    },
-    {
-      key: 'inventory',
-      label: Number(summary.totalInventoryAmount) > 0 ? '库存金额' : '库存数量',
-      labelEn: Number(summary.totalInventoryAmount) > 0 ? 'Inventory Amt' : 'Inventory Qty',
-      value: Number(summary.totalInventoryAmount) > 0
-        ? MONEY(summary.totalInventoryAmount)
-        : MONEY(summary.totalInventoryQty),
-      tip: `SKU ${summary.inventorySkuCount || 0} · 金额 ${MONEY(summary.totalInventoryAmount)} · 数量 ${MONEY(summary.totalInventoryQty)}`,
-      icon: <DatabaseOutlined />,
-      tone: 'slate',
-      path: '/business/inventory',
-    },
-    {
-      key: 'customer',
-      label: '客户开发额',
-      labelEn: 'Customer Dev',
-      value: MONEY(summary.totalCustomerDevAmount),
-      tip: `${summary.customerDevCount || 0} 家客户`,
-      icon: <SolutionOutlined />,
-      tone: 'olive',
-      path: '/business/customer-dev',
-    },
-    {
-      key: 'dealer',
-      label: '经销商排名',
-      labelEn: 'Dealer Rank',
-      value: summary.dealerCount || 0,
-      tip: '销售排名收录家数',
-      icon: <TrophyOutlined />,
-      tone: 'bronze',
-      path: '/business/sales-rank',
-      suffix: '家',
-      suffixEn: 'Dealers',
-    },
-  ]
-
   const trendOption = useMemo(() => {
     const list = data.onlineSaleTrend || []
     const periods = [...new Set(list.map((i) => i.periodName || '-'))].sort()
@@ -263,48 +181,89 @@ export default function Dashboard() {
       return m ? `${Number(m[1])}月` : p
     }
     return {
-      color: ['#8b1a1a', '#c9a227'],
-      tooltip: { trigger: 'axis', textStyle: { fontSize: 13 } },
+      color: ['#c9a227', '#6a9fd8'],
+      tooltip: { trigger: 'axis', appendToBody: true, confine: true, textStyle: { fontSize: 11, color: '#e0e6ed', lineHeight: 13 }, padding: 0, borderWidth: 0, backgroundColor: 'transparent', borderColor: 'transparent', shadowBlur: 0, shadowColor: 'transparent', extraCssText: 'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;' },
       legend: {
         data: channels.map((c) => `${c}销售额`),
         top: 0,
         right: 0,
-        itemWidth: 14,
-        itemHeight: 10,
-        textStyle: { color: '#595959', fontSize: 13 },
+        itemWidth: 16,
+        itemHeight: 8,
+        itemGap: 14,
+        textStyle: { color: '#8c9bb0', fontSize: 12, fontWeight: 500 },
+        inactiveColor: 'rgba(140, 155, 176, 0.35)',
       },
-      grid: { left: 52, right: 14, top: 34, bottom: 26 },
+      grid: { left: 50, right: 14, top: 34, bottom: 26 },
       xAxis: {
         type: 'category',
         data: periods.map(monthLabel),
-        axisLine: { lineStyle: { color: '#d9d9d9' } },
-        axisLabel: { color: '#8c8c8c', fontSize: 13 },
+        axisLine: { lineStyle: { color: 'rgba(120, 170, 230, 0.18)' } },
+        axisTick: { show: false },
+        axisLabel: { color: '#7a8ba0', fontSize: 12, fontWeight: 500 },
       },
       yAxis: {
         type: 'value',
         axisLabel: {
-          color: '#8c8c8c',
-          fontSize: 13,
+          color: '#6a7a8a',
+          fontSize: 11,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(120, 170, 230, 0.08)' } },
       },
-      series: channels.map((channel, idx) => ({
-        name: `${channel}销售额`,
-        type: 'bar',
-        barMaxWidth: 18,
-        barGap: '20%',
-        data: periods.map((p) => byKey[`${channel}|${p}`] || 0),
-        itemStyle: { borderRadius: [3, 3, 0, 0] },
-        label: {
-          show: true,
-          position: 'top',
-          color: idx === 0 ? '#8b1a1a' : '#8a7020',
-          fontSize: 11,
-          fontWeight: 600,
-          formatter: (p) => (p.value ? MONEY(p.value) : ''),
-        },
-      })),
+      series: channels.map((channel, idx) => {
+        const isMain = idx === 0
+        const baseColor = isMain ? '#c9a227' : '#6a9fd8'
+        return {
+          name: `${channel}销售额`,
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 7,
+          lineStyle: {
+            width: 2.5,
+            color: baseColor,
+            shadowColor: isMain ? 'rgba(201, 162, 39, 0.35)' : 'rgba(106, 159, 216, 0.30)',
+            shadowBlur: 8,
+          },
+          itemStyle: {
+            color: baseColor,
+            borderColor: '#0a1929',
+            borderWidth: 1.5,
+          },
+          areaStyle: isMain
+            ? {
+                color: {
+                  type: 'linear',
+                  x: 0, y: 0, x2: 0, y2: 1,
+                  colorStops: [
+                    { offset: 0, color: 'rgba(201, 162, 39, 0.22)' },
+                    { offset: 1, color: 'rgba(201, 162, 39, 0.02)' },
+                  ],
+                },
+              }
+            : undefined,
+          data: periods.map((p) => byKey[`${channel}|${p}`] || 0),
+          label: {
+            show: true,
+            position: 'top',
+            color: baseColor,
+            fontSize: 11,
+            fontWeight: 600,
+            formatter: (p) => (p.value ? MONEY(p.value) : ''),
+          },
+          emphasis: {
+            scale: true,
+            focus: 'series',
+            lineStyle: { width: 3.2 },
+            itemStyle: {
+              borderColor: '#fff',
+              borderWidth: 2,
+              shadowColor: baseColor,
+              shadowBlur: 12,
+            },
+          },
+        }
+      }),
     }
   }, [data.onlineSaleTrend])
 
@@ -316,30 +275,99 @@ export default function Dashboard() {
       const label = i.productName ? `${series} · ${i.productName}` : series
       seriesMap[label] = (seriesMap[label] || 0) + Number(i.quantity || i.ratio || 0)
     })
-    const chartData = Object.entries(seriesMap).map(([name, value]) => ({ name, value }))
+    // 调色板：每个颜色附带亮色用于径向渐变填色，增强立体感
+    const palette = [
+      { base: '#c9a227', light: '#e8c466' },
+      { base: '#6a9fd8', light: '#9bc4e8' },
+      { base: '#6b9f78', light: '#9cc5a6' },
+      { base: '#4a6fa5', light: '#7a9bc4' },
+      { base: '#c87a4a', light: '#e0a07a' },
+      { base: '#7a5c4e', light: '#a07e6e' },
+    ]
+    const truncate = (s, n) => (s && s.length > n ? `${s.slice(0, n)}…` : s || '')
+    const entries = Object.entries(seriesMap)
+    const chartData = entries.map(([name, value], idx) => {
+      const c = palette[idx % palette.length]
+      return {
+        name,
+        value,
+        itemStyle: {
+          color: {
+            type: 'radial',
+            x: 0.5,
+            y: 0.4,
+            r: 0.8,
+            colorStops: [
+              { offset: 0, color: c.light },
+              { offset: 1, color: c.base },
+            ],
+          },
+          borderColor: 'rgba(255, 250, 243, 0.9)',
+          borderWidth: 1.5,
+          shadowColor: 'rgba(0, 0, 0, 0.35)',
+          shadowBlur: 8,
+        },
+        label: { color: c.base },
+      }
+    })
     return {
-      color: ['#8b1a1a', '#c9a227', '#6b8f71', '#4a6fa5', '#a0522d', '#7a5c4e'],
+      color: palette.map((c) => c.base),
       tooltip: {
         trigger: 'item',
-        textStyle: { fontSize: 13 },
+        appendToBody: true,
+        confine: true,
+        textStyle: { fontSize: 11, color: '#e0e6ed', lineHeight: 13 },
+        padding: 0,
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText: 'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;',
         formatter: (p) => `${p.name}<br/>销量 Qty：${p.value} 箱<br/>占比 Share：${p.percent}%`,
       },
-      legend: {
-        orient: 'vertical',
-        right: 4,
-        top: 'middle',
-        itemWidth: 12,
-        itemHeight: 10,
-        textStyle: { color: '#595959', fontSize: 12 },
-      },
+      legend: { show: false },
       series: [
         {
           type: 'pie',
-          radius: ['38%', '64%'],
-          center: ['36%', '52%'],
+          radius: ['42%', '68%'],
+          center: ['50%', '48%'],
           avoidLabelOverlap: true,
-          itemStyle: { borderRadius: 3, borderColor: '#fff', borderWidth: 1 },
-          label: { show: false },
+          itemStyle: {
+            borderRadius: 4,
+            borderColor: 'rgba(255, 250, 243, 0.9)',
+            borderWidth: 1.5,
+          },
+          label: {
+            show: true,
+            position: 'outside',
+            fontSize: 12,
+            fontWeight: 700,
+            color: '#eef3f8',
+            formatter: (p) => {
+              const parts = p.name.split('·').map((s) => s.trim())
+              const name = parts.length > 1 ? parts.slice(1).join('·') : parts[0]
+              return truncate(name, 8)
+            },
+            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          },
+          labelLine: {
+            show: true,
+            length: 10,
+            length2: 12,
+            smooth: true,
+            lineStyle: { color: 'rgba(140, 157, 176, 0.4)', width: 1 },
+          },
+          labelLayout: { hideOverlap: false },
+          emphasis: {
+            scale: true,
+            scaleSize: 8,
+            label: { show: true, fontWeight: 700 },
+            itemStyle: {
+              shadowBlur: 14,
+              shadowColor: 'rgba(201, 162, 39, 0.35)',
+              borderColor: 'rgba(255, 250, 243, 1)',
+              borderWidth: 2,
+            },
+          },
           data: chartData,
         },
       ],
@@ -348,56 +376,122 @@ export default function Dashboard() {
 
   const rankOption = useMemo(() => {
     const list = [...(data.salesRank || [])].slice(0, 8).reverse()
+    const total = list.reduce((s, i) => s + Number(i.amount || 0), 0)
     return {
-      color: ['#8b1a1a'],
       tooltip: {
         trigger: 'axis',
-        axisPointer: { type: 'shadow' },
+        appendToBody: true,
+        confine: true,
+        axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(201, 162, 39, 0.06)' } },
+        textStyle: { fontSize: 11, color: '#e0e6ed', lineHeight: 13 },
+        padding: 0,
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText: 'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;',
         formatter: (params) => {
           const p = params?.[0]
           if (!p) return ''
-          return `${p.name}<br/>销售额：${MONEY(p.value)}`
+          const pct = total > 0 ? ((p.value / total) * 100).toFixed(1) : '0'
+          return `${p.name}<br/>销售额：${MONEY(p.value)}（${pct}%）`
         },
       },
-      grid: { left: 96, right: 56, top: 8, bottom: 8 },
+      grid: { left: 96, right: 58, top: 8, bottom: 8 },
       xAxis: {
         type: 'value',
         axisLabel: {
-          color: '#8c8c8c',
-          fontSize: 12,
+          color: '#5a6a7a',
+          fontSize: 11,
           formatter: (v) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v),
         },
-        splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { type: 'dashed', color: 'rgba(120, 170, 230, 0.07)' } },
       },
       yAxis: {
         type: 'category',
         data: list.map((i) => i.companyName),
-        axisLabel: { color: '#595959', width: 84, overflow: 'truncate', fontSize: 13 },
+        axisLabel: {
+          color: '#8c9bb0',
+          width: 86,
+          overflow: 'truncate',
+          fontSize: 12,
+          fontWeight: 500,
+        },
         axisLine: { show: false },
         axisTick: { show: false },
       },
       series: [
         {
           type: 'bar',
-          barMaxWidth: 16,
-          data: list.map((i) => Number(i.amount || 0)),
-          itemStyle: { borderRadius: [0, 5, 5, 0] },
+          barMaxWidth: 18,
+          data: list.map((i, idx) => ({
+            value: Number(i.amount || 0),
+            itemStyle: {
+              borderRadius: [0, 5, 5, 0],
+              color: {
+                type: 'linear',
+                x: 0, y: 0, x2: 1, y2: 0,
+                colorStops: [
+                  { offset: 0, color: idx === list.length - 1 ? 'rgba(201, 162, 39, 0.45)' : 'rgba(201, 162, 39, 0.65)' },
+                  { offset: 1, color: '#e0b838' },
+                ],
+              },
+              shadowColor: 'rgba(201, 162, 39, 0.30)',
+              shadowBlur: 6,
+            },
+          })),
           label: {
             show: true,
             position: 'right',
-            color: '#8c8c8c',
+            color: '#e0b838',
             fontSize: 12,
+            fontWeight: 600,
             formatter: (p) => MONEY(p.value),
+            textShadow: '0 0 6px rgba(224, 184, 56, 0.30)',
+          },
+          emphasis: {
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0, y: 0, x2: 1, y2: 0,
+                colorStops: [
+                  { offset: 0, color: 'rgba(224, 184, 56, 0.75)' },
+                  { offset: 1, color: '#f0c840' },
+                ],
+              },
+              shadowColor: 'rgba(224, 184, 56, 0.55)',
+              shadowBlur: 12,
+              borderColor: 'rgba(255, 250, 243, 0.9)',
+              borderWidth: 1,
+            },
+            label: { color: '#f8d870', fontWeight: 700 },
           },
         },
       ],
     }
   }, [data.salesRank])
 
+  // 省份短名 → ECharts 中国地图 JSON 中的标准全名
+  const PROVINCE_FULL_NAMES = {
+    北京: '北京市', 天津: '天津市', 上海: '上海市', 重庆: '重庆市',
+    内蒙古: '内蒙古自治区', 广西: '广西壮族自治区', 西藏: '西藏自治区',
+    宁夏: '宁夏回族自治区', 新疆: '新疆维吾尔自治区',
+    香港: '香港特别行政区', 澳门: '澳门特别行政区',
+  }
+  const normalizeProvinceName = (raw) => {
+    const name = (raw || '').trim()
+    if (!name) return ''
+    if (/省|市|自治区|特别行政区/.test(name)) return name
+    if (PROVINCE_FULL_NAMES[name]) return PROVINCE_FULL_NAMES[name]
+    return `${name}省`
+  }
+
   const offsiteProvinceAgg = useMemo(() => {
     const map = {}
     ;(data.offsiteSales || []).forEach((r) => {
-      const province = (r.province || '').replace(/省|市|自治区|壮族|回族|维吾尔/g, '') || '未知'
+      const province = normalizeProvinceName(r.province)
+      if (!province) return
       map[province] = (map[province] || 0) + Number(r.quantity || 0)
     })
     return Object.entries(map)
@@ -410,57 +504,96 @@ export default function Dashboard() {
     [offsiteProvinceAgg],
   )
 
+  // 平方根缩放：避免最大值（山西 8060）把小销量省份压得看不出颜色
+  const offsiteMapData = useMemo(
+    () => offsiteProvinceAgg.map((i) => ({ name: i.name, value: Math.sqrt(i.value), realValue: i.value })),
+    [offsiteProvinceAgg],
+  )
+  const offsiteMapMax = useMemo(
+    () => Math.sqrt(Math.max(1, ...offsiteProvinceAgg.map((i) => i.value))),
+    [offsiteProvinceAgg],
+  )
+
   const offsiteMapOption = useMemo(
     () => ({
       tooltip: {
         trigger: 'item',
-        formatter: (p) => `${p.name}<br/>异地销量：${Number(p.value || 0).toLocaleString('zh-CN')}`,
+        appendToBody: true,
+        confine: true,
+        textStyle: { fontSize: 11, color: '#e0e6ed', lineHeight: 13 },
+        padding: 0,
+        borderWidth: 0,
+        backgroundColor: 'transparent',
+        shadowBlur: 0,
+        extraCssText: 'white-space:nowrap;background:transparent;border:none;box-shadow:none !important;',
+        formatter: (p) => {
+          const real = p.data?.realValue
+          if (real == null || Number(real) <= 0) return ''
+          return `${p.name}<br/>异地销量：${Number(real).toLocaleString('zh-CN')}`
+        },
       },
       visualMap: {
         min: 0,
-        max: Math.max(10, ...offsiteProvinceAgg.map((i) => i.value), 0),
-        left: 2,
-        bottom: 4,
+        max: offsiteMapMax,
+        left: 4,
+        bottom: 6,
         text: ['高 High', '低 Low'],
-        textStyle: { color: '#6b625a', fontSize: 12 },
-        inRange: { color: ['#f7e8d3', '#d4a84b', '#8b1a1a'] },
+        textStyle: {
+          color: '#8c9bb0',
+          fontSize: 11,
+          fontWeight: 500,
+        },
+        inRange: { color: ['#1a3a5e', '#3a7ab0', '#6fb3d8', '#c9a227'] },
         calculable: false,
-        itemWidth: 10,
-        itemHeight: 72,
+        itemWidth: 12,
+        itemHeight: 80,
+        borderColor: 'rgba(120, 170, 230, 0.18)',
+        borderWidth: 1,
+        shadowColor: 'rgba(0, 0, 0, 0.35)',
+        shadowBlur: 6,
       },
       series: [
         {
           type: 'map',
           map: 'china',
-          roam: false,
+          roam: true,
+          scaleLimit: { min: 0.8, max: 3 },
           zoom: 1.05,
-          layoutCenter: ['54%', '50%'],
-          layoutSize: '92%',
+          layoutCenter: ['50%', '50%'],
+          layoutSize: '98%',
           aspectScale: 0.82,
           itemStyle: {
-            areaColor: '#f3ece0',
-            borderColor: '#d9cbb6',
-            borderWidth: 0.7,
+            areaColor: '#132843',
+            borderColor: 'rgba(120, 180, 255, 0.22)',
+            borderWidth: 0.8,
+            shadowColor: 'rgba(0, 0, 0, 0.45)',
+            shadowBlur: 8,
           },
-          label: {
-            show: true,
-            color: '#4a433c',
-            fontSize: 11,
-            formatter: (p) => {
-              // 南海诸岛等小区域不标，避免挤成一团
-              if (!p.name || p.name.includes('南海') || p.name.includes('九段')) return ''
-              return p.name
+          label: { show: false },
+          emphasis: {
+            label: {
+              show: true,
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 13,
+              textShadow: '0 1px 3px rgba(0,0,0,0.65), 0 0 6px rgba(0,0,0,0.4)',
+              backgroundColor: 'rgba(8, 20, 40, 0.85)',
+              padding: [3, 6],
+              borderRadius: 4,
+            },
+            itemStyle: {
+              areaColor: '#e0b838',
+              borderColor: 'rgba(255, 250, 243, 0.9)',
+              borderWidth: 1.2,
+              shadowColor: 'rgba(224, 184, 56, 0.55)',
+              shadowBlur: 16,
             },
           },
-          emphasis: {
-            label: { show: true, color: '#1f1a17', fontWeight: 600, fontSize: 13 },
-            itemStyle: { areaColor: '#e8c56a' },
-          },
-          data: offsiteProvinceAgg,
+          data: offsiteMapData,
         },
       ],
     }),
-    [offsiteProvinceAgg],
+    [offsiteMapData, offsiteMapMax],
   )
 
   const retentionColumns = [
@@ -482,7 +615,11 @@ export default function Dashboard() {
       dataIndex: 'daysSincePurchase',
       width: 88,
       align: 'right',
-      render: (v) => <span className={styles.daysBadge}>{v || 0}天</span>,
+      render: (v) => {
+        const d = v || 0
+        const cls = d >= 90 ? styles.daysBadgeHigh : d >= 70 ? styles.daysBadgeMid : ''
+        return <span className={`${styles.daysBadge}${cls ? ' ' + cls : ''}`}>{d}天</span>
+      },
     },
     {
       title: (
@@ -569,193 +706,75 @@ export default function Dashboard() {
 
   const chartFill = { height: '100%', width: '100%', minHeight: 0 }
   const offsiteMax = offsiteTopProvinces[0]?.value || 1
-  const retentionRows = (data.retentionAlerts || []).slice(0, 8)
+  // 未复购：按天数从小到大排序（刚满60天的在前）
+  const retentionSorted = [...(data.retentionAlerts || [])].sort((a, b) => (a.daysSincePurchase || 0) - (b.daysSincePurchase || 0))
+  const retentionRows = retentionSorted.slice(0, 8)
   const inventoryRows = (data.inventory || []).slice(0, 8)
   const customerRows = (data.customerDev || []).slice(0, 6)
+  const priceList = (priceRows || []).slice(0, 6)
+
+  // 汇总数据
+  const invTotalQty = (data.inventory || []).reduce((s, r) => s + Number(r.quantity || 0), 0)
+  const invTotalAmt = (data.inventory || []).reduce((s, r) => s + Number(r.amount || 0), 0)
+  const custTotal = (data.customerDev || []).length
+  const custTotalAmt = (data.customerDev || []).reduce((s, r) => s + Number(r.amount || 0), 0)
+  const offsiteTotalQty = (data.offsiteSales || []).reduce((s, r) => s + Number(r.quantity || 0), 0)
+  const offsiteTotalAmt = (data.offsiteSales || []).reduce((s, r) => s + Number(r.amount || 0), 0)
+  const trendTotal = (data.onlineSaleTrend || []).reduce((s, r) => s + Number(r.saleAmount || 0), 0)
+  const rankTotal = (data.salesRank || []).reduce((s, r) => s + Number(r.amount || 0), 0)
+  const retentionTotal = data.summary?.retentionAlertCount || (data.retentionAlerts || []).length
+  const priceCrawlTime = priceRows?.[0]?.crawlTime
+  const structureTotal = (data.productStructure || []).reduce((s, r) => s + Number(r.quantity || 0), 0)
 
   return (
     <div ref={pageRef} className={`${styles.page} ${fullscreen ? styles.fullscreen : ''} ${styles.oneScreen}`}>
-      <div className={styles.hero}>
-        <div className={styles.heroText}>
-          <BiTitle
-            as="div"
-            className={styles.eyebrow}
-            zh="经营数据看板"
-            en="Operations Dashboard"
-          />
-          <h1>
-            <span className={styles.biZh}>{title || '汾源酒业经营体'}</span>
-            <span className={styles.heroEn}>Fenyuan Liquor Operations Board</span>
-          </h1>
-          <p>
-            你好，{name}。客户维护 · 比价 · 异地销售一屏总览
-            <span className={styles.heroSubEn}>Customer · Pricing · Offsite Sales at a Glance</span>
-          </p>
-        </div>
-        <div className={styles.heroMeta}>
-          <span className={styles.metaLine}>
-            <span className={styles.metaZh}>数据更新</span>
-            <span className={styles.metaEn}>Updated</span>
-            <span className={styles.metaVal}>{updatedAt || '--'}</span>
-          </span>
-          <Space size={8} className={styles.heroActions}>
-            <Button
-              type="primary"
-              icon={fullscreen ? <CompressOutlined /> : <ExpandOutlined />}
-              onClick={toggleFullscreen}
-              className={styles.refreshBtn}
-            >
-              {fullscreen ? '退出全屏 Exit' : '全屏 Full Screen'}
-            </Button>
-            <Button
-              type="primary"
-              icon={<ReloadOutlined />}
-              loading={loading}
-              onClick={load}
-              className={styles.refreshBtn}
-            >
-              刷新 Refresh
-            </Button>
-          </Space>
-        </div>
-      </div>
-
       <Spin spinning={loading} className={styles.boardSpin} wrapperClassName={styles.boardSpinWrap}>
         <div className={styles.board}>
-          <div className={styles.kpiGrid}>
-            {kpiCards.map((card) => (
-              <Tooltip key={card.key} title={card.tip}>
-                <button
-                  type="button"
-                  className={`${styles.kpiCard} ${styles[card.tone]}`}
-                  onClick={() => navigate(card.path)}
-                >
-                  <div className={styles.kpiIcon}>{card.icon}</div>
-                  <div className={styles.kpiBody}>
-                    <div className={styles.kpiLabel}>
-                      <span className={styles.biZh}>{card.label}</span>
-                      {card.labelEn ? <span className={styles.biEn}>{card.labelEn}</span> : null}
-                    </div>
-                    <div className={styles.kpiValue}>
-                      {card.value}
-                      {card.suffix ? (
-                        <small>
-                          {card.suffix}
-                          {card.suffixEn ? <span className={styles.suffixEn}>{card.suffixEn}</span> : null}
-                        </small>
-                      ) : null}
-                    </div>
-                  </div>
-                </button>
-              </Tooltip>
-            ))}
-          </div>
+          {/* 左侧竖排标题栏 */}
+          <aside className={styles.sideBar}>
+            <div className={styles.sideBadge}>
+              <span className={styles.sideBadgeZh}>经营数据看板</span>
+              <span className={styles.sideBadgeEn}>Operations Dashboard</span>
+            </div>
+            <div className={styles.sideTitleWrap}>
+              <span className={styles.sideTitleMain}>{title || '汾源酒业经营体'}</span>
+              <span className={styles.sideTitleEn}>Fenyuan Liquor Operations Board</span>
+              <span className={styles.sideTitleSub}>客户维护 · 比价 · 异地销售一屏总览</span>
+            </div>
+            <div className={styles.sideFooter}>
+              <div className={styles.sideTime}>
+                <span>数据更新</span>
+                <span>UPDATED</span>
+                <span className={styles.sideTimeVal}>{updatedAt || '--'}</span>
+              </div>
+              <Button
+                type="primary"
+                icon={fullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+                onClick={toggleFullscreen}
+                className={styles.sideBtn}
+              >
+                {fullscreen ? '退出' : '全屏'}
+              </Button>
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
+                loading={loading}
+                onClick={load}
+                className={styles.sideBtn}
+              >
+                刷新
+              </Button>
+            </div>
+          </aside>
 
+          {/* 右侧面板网格 */}
           <div className={styles.mainGrid}>
-            <section className={`${styles.panel} ${styles.panelRetention}`}>
-              <header className={styles.panelHead}>
-                <BiTitle zh="60天未复购客户" en="Inactive Customers 60d" />
-                <button
-                  type="button"
-                  className={styles.linkBtn}
-                  onClick={() => navigate('/business/customer-maintain')}
-                >
-                  明细 Detail
-                </button>
-              </header>
-              <div className={styles.panelBody}>
-                <Table
-                  size="small"
-                  rowKey={(r) => `${r.customerName}-${r.daysSincePurchase}`}
-                  pagination={false}
-                  columns={retentionColumns}
-                  dataSource={retentionRows}
-                  locale={{ emptyText: '暂无预警客户 No Alerts' }}
-                />
-              </div>
-            </section>
-
-            <section className={`${styles.panel} ${styles.mapPanel}`}>
-              <header className={styles.panelHead}>
-                <BiTitle zh="异地销售地图" en="Offsite Sales Map" />
-                <button
-                  type="button"
-                  className={styles.linkBtn}
-                  onClick={() => navigate('/business/offsite-sales')}
-                >
-                  明细 Detail
-                </button>
-              </header>
-              <div className={styles.panelBody}>
-                {mapReady && offsiteProvinceAgg.length ? (
-                  <div className={styles.mapBody}>
-                    <div className={styles.mapChart}>
-                      <ReactECharts
-                        key={`offsite-${chartKey}`}
-                        option={offsiteMapOption}
-                        style={chartFill}
-                        opts={{ renderer: 'canvas' }}
-                      />
-                    </div>
-                    <aside className={styles.mapRank}>
-                      <div className={styles.mapRankTitle}>
-                        <span className={styles.biZh}>省份销量 TOP</span>
-                        <span className={styles.biEn}>Province TOP</span>
-                      </div>
-                      <ul className={styles.mapRankList}>
-                        {offsiteTopProvinces.map((item, idx) => (
-                          <li key={item.name} className={styles.mapRankItem}>
-                            <span className={`${styles.mapRankNo} ${idx < 3 ? styles.mapRankTop : ''}`}>
-                              {idx + 1}
-                            </span>
-                            <span className={styles.mapRankName}>{item.name}</span>
-                            <span className={styles.mapRankBarWrap}>
-                              <span
-                                className={styles.mapRankBar}
-                                style={{ width: `${Math.max(8, (item.value / offsiteMax) * 100)}%` }}
-                              />
-                            </span>
-                            <span className={styles.mapRankVal}>{MONEY(item.value)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </aside>
-                  </div>
-                ) : (
-                  <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={mapReady ? '暂无异地销售数据 No Data' : '地图加载中… Loading Map'}
-                  />
-                )}
-              </div>
-            </section>
-
-            <section className={styles.panel}>
-              <header className={styles.panelHead}>
-                <BiTitle zh="在线销售趋势" en="Online Sales Trend" />
-                <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/online-sale')}>
-                  明细 Detail
-                </button>
-              </header>
-              <div className={styles.panelBody}>
-                {(data.onlineSaleTrend || []).length ? (
-                  <ReactECharts
-                    key={`trend-${chartKey}`}
-                    option={trendOption}
-                    style={chartFill}
-                    opts={{ renderer: 'canvas' }}
-                  />
-                ) : (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无销售数据 No Sales Data" />
-                )}
-              </div>
-            </section>
-
-            <section className={styles.panel}>
+            {/* 左列：产品结构 / 库存 / 客户开发 */}
+            <section className={`${styles.panel} ${styles.colLeft1}`}>
               <header className={styles.panelHead}>
                 <BiTitle zh="销售产品结构" en="Product Mix" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/product-structure')}>
-                  明细 Detail
+                  共计销售 {MONEY(structureTotal)} 详情查看→
                 </button>
               </header>
               <div className={styles.panelBody}>
@@ -772,11 +791,138 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className={styles.panel}>
+            <section className={`${styles.panel} ${styles.colLeft2}`}>
+              <header className={styles.panelHead}>
+                <BiTitle zh="库存概况" en="Inventory" />
+                <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/inventory')}>
+                  共计剩余 {MONEY(invTotalQty)} 详情查看→
+                </button>
+              </header>
+              <div className={styles.panelBody}>
+                <Table
+                  size="small"
+                  rowKey={(r) => `${r.productName}-${r.warehouse}`}
+                  pagination={false}
+                  columns={inventoryColumnsCompact}
+                  dataSource={inventoryRows}
+                  locale={{ emptyText: '暂无库存 No Inventory' }}
+                />
+              </div>
+            </section>
+
+            <section className={`${styles.panel} ${styles.colLeft3}`}>
+              <header className={styles.panelHead}>
+                <BiTitle zh="客户开发" en="Customer Dev" />
+                <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/customer-dev')}>
+                  共开发 {custTotal} 个客户 详情查看→
+                </button>
+              </header>
+              <div className={styles.panelBody}>
+                <Table
+                  size="small"
+                  rowKey={(r) => `${r.openMonth}-${r.name}`}
+                  pagination={false}
+                  columns={customerColumns}
+                  dataSource={customerRows}
+                  locale={{ emptyText: '暂无新开客户 No New Customers' }}
+                />
+              </div>
+            </section>
+
+            {/* 中列：地图 / 销售趋势 */}
+            <section className={`${styles.panel} ${styles.colCenter1}`}>
+              <header className={styles.panelHead}>
+                <BiTitle zh="异地销售地图" en="Offsite Sales Map" />
+                <button
+                  type="button"
+                  className={styles.linkBtn}
+                  onClick={() => navigate('/business/offsite-sales')}
+                >
+                  共计 {MONEY(offsiteTotalQty)} 详情查看→
+                </button>
+              </header>
+              <div className={styles.panelBody}>
+                {mapReady && offsiteProvinceAgg.length ? (
+                  <div className={styles.mapBody}>
+                    <div className={styles.mapChart}>
+                      <ReactECharts
+                        ref={mapChartRef}
+                        key={`offsite-${chartKey}`}
+                        option={offsiteMapOption}
+                        style={chartFill}
+                        opts={{ renderer: 'canvas' }}
+                        onEvents={onMapEvents}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={mapReady ? '暂无异地销售数据 No Data' : '地图加载中… Loading Map'}
+                  />
+                )}
+              </div>
+            </section>
+
+            <section className={`${styles.panel} ${styles.colCenter2}`}>
+              <header className={styles.panelHead}>
+                <BiTitle zh="在线销售趋势" en="Online Sales Trend" />
+                <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/online-sale')}>
+                  共计 {MONEY(trendTotal)} 详情查看→
+                </button>
+              </header>
+              <div className={styles.panelBody}>
+                {(data.onlineSaleTrend || []).length ? (
+                  <ReactECharts
+                    key={`trend-${chartKey}`}
+                    option={trendOption}
+                    style={chartFill}
+                    opts={{ renderer: 'canvas' }}
+                  />
+                ) : (
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无销售数据 No Sales Data" />
+                )}
+              </div>
+            </section>
+
+            {/* 右列：价格对比 / 经销商排名 / 未复购 */}
+            <section className={`${styles.panel} ${styles.colRight1}`}>
+              <header className={styles.panelHead}>
+                <BiTitle zh="价格对比" en="Price Compare" />
+                <span className={styles.priceUpdateTime}>{priceCrawlTime || '--'}</span>
+                <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/price-compare')}>
+                  实时价格 详情查看→
+                </button>
+              </header>
+              <div className={styles.panelBody}>
+                {priceList.length ? (
+                  <div style={{ overflowY: 'auto', height: '100%' }}>
+                    <div className={styles.priceHeader}>
+                      <span>产品</span>
+                      <span className={styles.priceHeaderFy}>汾源</span>
+                      <span className={styles.priceHeaderJd}>美团</span>
+                      <span className={styles.priceHeaderTmall}>天猫</span>
+                    </div>
+                    {priceList.map((r) => (
+                      <div key={r.id} className={styles.priceRow}>
+                        <span className={styles.priceRowName}>{r.productName}</span>
+                        <span className={`${styles.priceFy}${r.salePrice ? '' : ' price-missing'}`}>{r.salePrice ? `¥${MONEY(r.salePrice)}` : '-'}</span>
+                        <span className={`${styles.priceJd}${r.jdPrice ? '' : ' price-missing'}`}>{r.jdPrice ? `¥${MONEY(r.jdPrice)}` : '-'}</span>
+                        <span className={`${styles.priceTmall}${r.tmallPrice ? '' : ' price-missing'}`}>{r.tmallPrice ? `¥${MONEY(r.tmallPrice)}` : '-'}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无价格数据 No Price Data" />
+                )}
+              </div>
+            </section>
+
+            <section className={`${styles.panel} ${styles.colRight2}`}>
               <header className={styles.panelHead}>
                 <BiTitle zh="经销商销售排名" en="Dealer Sales Rank" />
                 <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/sales-rank')}>
-                  明细 Detail
+                  共计销售 {MONEY(rankTotal)} 详情查看→
                 </button>
               </header>
               <div className={styles.panelBody}>
@@ -793,42 +939,26 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className={`${styles.panel} ${styles.panelSplit}`}>
-              <div className={styles.splitHalf}>
-                <header className={styles.panelHead}>
-                  <BiTitle zh="库存概况" en="Inventory" />
-                  <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/inventory')}>
-                    明细 Detail
-                  </button>
-                </header>
-                <div className={styles.panelBody}>
-                  <Table
-                    size="small"
-                    rowKey={(r) => `${r.productName}-${r.warehouse}`}
-                    pagination={false}
-                    columns={inventoryColumnsCompact}
-                    dataSource={inventoryRows}
-                    locale={{ emptyText: '暂无库存 No Inventory' }}
-                  />
-                </div>
-              </div>
-              <div className={styles.splitHalf}>
-                <header className={styles.panelHead}>
-                  <BiTitle zh="客户开发" en="Customer Dev" />
-                  <button type="button" className={styles.linkBtn} onClick={() => navigate('/business/customer-dev')}>
-                    明细 Detail
-                  </button>
-                </header>
-                <div className={styles.panelBody}>
-                  <Table
-                    size="small"
-                    rowKey={(r) => `${r.openMonth}-${r.name}`}
-                    pagination={false}
-                    columns={customerColumns}
-                    dataSource={customerRows}
-                    locale={{ emptyText: '暂无新开客户 No New Customers' }}
-                  />
-                </div>
+            <section className={`${styles.panel} ${styles.colRight3}`}>
+              <header className={styles.panelHead}>
+                <BiTitle zh="60天未复购客户" en="Inactive Customers 60d" />
+                <button
+                  type="button"
+                  className={styles.linkBtn}
+                  onClick={() => navigate('/business/customer-maintain')}
+                >
+                  共计 {retentionTotal} 客户 详情查看→
+                </button>
+              </header>
+              <div className={styles.panelBody}>
+                <Table
+                  size="small"
+                  rowKey={(r) => `${r.customerName}-${r.daysSincePurchase}`}
+                  pagination={false}
+                  columns={retentionColumns}
+                  dataSource={retentionRows}
+                  locale={{ emptyText: '暂无预警客户 No Alerts' }}
+                />
               </div>
             </section>
           </div>

@@ -55,7 +55,7 @@ export default function PriceComparePage() {
         showIcon
         style={{ marginBottom: 16 }}
         message="酒类价格对比"
-        description="点击「拉取线上酒价」从京东/天猫官方店抓取实时价（汾酒按元/件=瓶价×6；飞天茅台仅网络价按元/瓶）。汾源销售价：53青花20=2350、42青花20=2300、53巴拿马20=1820、53老白汾10=810。"
+        description="点击「拉取线上酒价」从美团/天猫抓取实时价（汾酒按元/件=瓶价×6；飞天茅台仅网络价按元/瓶）。汾源酒业销售价：53青花20=2350、42青花20=2300、53巴拿马20=1820、53老白汾10=810。"
       />
       <BizCrudPage
         title="酒类价格对比"
@@ -68,18 +68,18 @@ export default function PriceComparePage() {
         onReady={handleReady}
         toolbarExtra={
           <Button type="primary" ghost icon={<CloudDownloadOutlined />} loading={crawling} onClick={onCrawl}>
-            拉取线上酒价
+            拉取线上酒价（拉取需要联网）
           </Button>
         }
         fields={[
           { name: 'productName', label: '产品名称', type: 'text', required: true, search: true },
           { name: 'spec', label: '规格', type: 'text', render: (v) => v || '500ml' },
-          { name: 'salePrice', label: '汾源销售价(元/件)', type: 'number', required: true, render: (v) => money(v) },
-          { name: 'jdPrice', label: '京东官方店', type: 'number', render: (v) => (v == null ? '-' : money(v)) },
-          { name: 'tmallPrice', label: '天猫官方店', type: 'number', render: (v) => (v == null ? '-' : money(v)) },
+          { name: 'salePrice', label: '汾源酒业(元/件)', type: 'number', required: true, render: (v) => money(v) },
+          { name: 'jdPrice', label: '美团', type: 'number', render: (v) => (v == null ? '-' : money(v)) },
+          { name: 'tmallPrice', label: '天猫', type: 'number', render: (v) => (v == null ? '-' : money(v)) },
           {
             name: 'jdDiff',
-            label: '较京东',
+            label: '较美团',
             type: 'text',
             form: false,
             render: (_, row) => diffTag(row.salePrice, row.jdPrice),

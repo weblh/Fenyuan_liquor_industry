@@ -1,6 +1,11 @@
 .sider {
-  min-height: 100vh;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.35);
+  border-right: 1px solid rgba(80, 130, 210, 0.14);
 }
 
 .logo {
@@ -9,7 +14,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(80, 130, 210, 0.16);
   overflow: hidden;
   white-space: nowrap;
 }
@@ -21,16 +26,22 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #8b1a1a;
-  color: #f5e6c8;
+  background: linear-gradient(135deg, #2f7cf6, #1d4e89);
+  color: #e8f1ff;
   font-weight: 700;
   font-size: 14px;
   flex-shrink: 0;
 }
 
 .logoText {
-  color: #fff;
+  color: #cfe2ff;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
+}
+
+.sider :global(.ant-menu) {
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }

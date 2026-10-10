@@ -3,18 +3,21 @@
   flex-wrap: wrap;
   gap: 6px;
   padding: 8px 12px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: #0c1426;
+  border-bottom: 1px solid rgba(80, 130, 210, 0.14);
 }
 
 .tag {
   cursor: pointer;
   margin: 0 !important;
   user-select: none;
+  background: #13203a !important;
+  border-color: #1f3152 !important;
+  color: #9fb2cc !important;
 }
 
 .active {
-  color: #8b1a1a !important;
-  background: #fdf2f2 !important;
-  border-color: #e8b4b4 !important;
+  color: #7db4ff !important;
+  background: rgba(47, 124, 246, 0.18) !important;
+  border-color: rgba(47, 124, 246, 0.5) !important;
 }

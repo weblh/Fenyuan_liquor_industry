@@ -57,9 +57,22 @@ export default function OffsiteSalesPage() {
   }, [loadMapData])
 
   const provinceAgg = useMemo(() => {
+    const fullNames = {
+      北京: '北京市', 天津: '天津市', 上海: '上海市', 重庆: '重庆市',
+      内蒙古: '内蒙古自治区', 广西: '广西壮族自治区', 西藏: '西藏自治区',
+      宁夏: '宁夏回族自治区', 新疆: '新疆维吾尔自治区',
+      香港: '香港特别行政区', 澳门: '澳门特别行政区',
+    }
+    const normalize = (raw) => {
+      const name = (raw || '').trim()
+      if (!name) return ''
+      if (/省|市|自治区|特别行政区/.test(name)) return name
+      return fullNames[name] || `${name}省`
+    }
     const map = {}
     rows.forEach((r) => {
-      const province = (r.province || '').replace(/省|市|自治区|壮族|回族|维吾尔/g, '') || '未知'
+      const province = normalize(r.province)
+      if (!province) return
       map[province] = (map[province] || 0) + Number(r.quantity || 0)
     })
     return Object.entries(map).map(([name, value]) => ({ name, value }))
@@ -67,8 +80,10 @@ export default function OffsiteSalesPage() {
 
   const mapOption = useMemo(
     () => ({
+      backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
+        appendToBody: true,
         formatter: (p) => `${p.name}<br/>异地销量：${p.value || 0}`,
       },
       visualMap: {
@@ -77,7 +92,8 @@ export default function OffsiteSalesPage() {
         left: 16,
         bottom: 16,
         text: ['高', '低'],
-        inRange: { color: ['#f7e8d3', '#c9a227', '#8b1a1a'] },
+        textStyle: { color: '#7a8ba0' },
+        inRange: { color: ['#1a3a5e', '#3a7ab0', '#2f7cf6'] },
         calculable: true,
       },
       series: [
@@ -85,10 +101,14 @@ export default function OffsiteSalesPage() {
           type: 'map',
           map: 'china',
           roam: true,
+          itemStyle: {
+            areaColor: '#0d1830',
+            borderColor: 'rgba(100, 160, 230, 0.2)',
+          },
           label: { show: false },
           emphasis: {
-            label: { show: true, color: '#1f1a17' },
-            itemStyle: { areaColor: '#e8c56a' },
+            label: { show: true, color: '#e8f1ff' },
+            itemStyle: { areaColor: '#4d8ff8' },
           },
           data: provinceAgg,
         },
